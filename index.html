@@ -430,7 +430,8 @@
             background:
                 linear-gradient(180deg, rgba(10,12,12,0.25), rgba(10,12,12,0.72)),
                 linear-gradient(90deg, rgba(0,0,0,0.45), rgba(0,0,0,0.05), rgba(0,0,0,0.45)),
-                url('bg.png') center / cover no-repeat;
+                url('bg.png') center / cover no-repeat,
+                url('assets/media/bottom-mud.png') center / cover no-repeat;
             filter: grayscale(52%) contrast(1.05) brightness(0.82);
             transform: scale(1.025);
             z-index: -3;
@@ -930,6 +931,311 @@
             }
         }
 
+
+        /* ===== 文章照片與影片：文繞圖版型 ===== */
+        .article-media {
+            float: right;
+            width: min(42%, 360px);
+            margin: 0.4rem 0 1.05rem 1.6rem;
+            border-radius: 18px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.76);
+            border: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 0 18px 42px rgba(0,0,0,0.10);
+            transform: translateZ(0);
+        }
+        .article-media.media-left {
+            float: left;
+            margin: 0.4rem 1.6rem 1.05rem 0;
+        }
+        .article-media.media-video {
+            width: min(46%, 390px);
+        }
+        .article-media.media-wide {
+            float: none;
+            clear: both;
+            width: min(100%, 760px);
+            margin: 2rem auto;
+        }
+        .article-media img,
+        .article-media video {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: #111;
+            object-fit: cover;
+        }
+        .article-media img {
+            filter: grayscale(8%) contrast(1.03) brightness(0.98);
+            transition: filter 0.45s ease, transform 0.45s ease;
+        }
+        .article-media:hover img,
+        .article-media:focus-within img {
+            filter: grayscale(0%) contrast(1.02) brightness(1);
+            transform: scale(1.015);
+        }
+        .article-media figcaption {
+            margin: 0;
+            padding: 10px 13px 11px;
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 0.78rem;
+            line-height: 1.55;
+            letter-spacing: 0.03em;
+            color: #666;
+            background: linear-gradient(90deg, rgba(255,255,255,0.92), var(--accent-soft));
+            border-top: 1px solid rgba(0,0,0,0.06);
+        }
+        #article-body::after {
+            content: "";
+            display: block;
+            clear: both;
+        }
+        body.zh-bpmf .article-media figcaption {
+            font-family: 'Noto Sans TC', sans-serif;
+            line-height: 1.65;
+        }
+        @media (max-width: 767px) {
+            .article-media,
+            .article-media.media-left,
+            .article-media.media-video,
+            .article-media.media-wide {
+                float: none;
+                clear: both;
+                width: 100%;
+                margin: 1.35rem 0 1.65rem;
+                border-radius: 16px;
+            }
+        }
+
+
+        /* ===== 右下角浮動：魚塭 AI 小助手 ===== */
+        .fish-ai-widget {
+            position: fixed;
+            right: 22px;
+            bottom: 22px;
+            z-index: 180;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .fish-ai-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(255,255,255,0.45);
+            border-radius: 999px;
+            padding: 12px 17px 12px 14px;
+            background: rgba(17,17,17,0.88);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.96rem;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            box-shadow: 0 18px 42px rgba(0,0,0,0.22);
+            backdrop-filter: blur(12px);
+            transition: transform 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+        }
+        .fish-ai-toggle:hover,
+        .fish-ai-toggle:focus-visible {
+            transform: translateY(-2px);
+            background: var(--accent, #111);
+            box-shadow: 0 22px 54px rgba(0,0,0,0.28);
+            outline: 3px dashed #ffeb3b;
+            outline-offset: 3px;
+        }
+        .fish-ai-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.34);
+            font-size: 1.08rem;
+        }
+        .fish-ai-panel {
+            position: absolute;
+            right: 0;
+            bottom: 64px;
+            width: min(92vw, 380px);
+            max-height: min(72vh, 620px);
+            display: none;
+            grid-template-rows: auto 1fr auto;
+            overflow: hidden;
+            border-radius: 24px;
+            background: rgba(251,251,248,0.96);
+            border: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 0 28px 80px rgba(0,0,0,0.28);
+            backdrop-filter: blur(18px);
+        }
+        .fish-ai-widget.is-open .fish-ai-panel {
+            display: grid;
+            animation: fish-ai-rise 0.28s ease both;
+        }
+        @keyframes fish-ai-rise {
+            from { opacity: 0; transform: translateY(12px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .fish-ai-header {
+            padding: 16px 18px 14px;
+            background:
+                radial-gradient(circle at 16% 20%, var(--accent-soft, rgba(111,143,159,0.18)), transparent 46%),
+                linear-gradient(180deg, rgba(255,255,255,0.84), rgba(255,255,255,0.62));
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+        .fish-ai-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .fish-ai-title {
+            font-family: 'Noto Serif TC', serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: 0.05em;
+            color: #111;
+        }
+        .fish-ai-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.08);
+            background: rgba(255,255,255,0.72);
+            color: #222;
+            cursor: pointer;
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+        .fish-ai-close:hover,
+        .fish-ai-close:focus-visible {
+            outline: 2px dashed var(--accent, #111);
+            outline-offset: 3px;
+        }
+        .fish-ai-subtitle {
+            margin: 7px 0 0;
+            color: #666;
+            font-size: 0.82rem;
+            line-height: 1.55;
+        }
+        .fish-ai-messages {
+            min-height: 220px;
+            overflow-y: auto;
+            padding: 16px;
+            scroll-behavior: smooth;
+        }
+        .fish-ai-message {
+            max-width: 86%;
+            margin-bottom: 12px;
+            padding: 11px 13px;
+            border-radius: 16px;
+            font-size: 0.93rem;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .fish-ai-message.bot {
+            color: #222;
+            background: #fff;
+            border: 1px solid rgba(0,0,0,0.07);
+            border-top-left-radius: 5px;
+            box-shadow: 0 10px 22px rgba(0,0,0,0.06);
+        }
+        .fish-ai-message.user {
+            margin-left: auto;
+            color: #fff;
+            background: var(--accent, #111);
+            border-top-right-radius: 5px;
+            box-shadow: 0 10px 22px rgba(0,0,0,0.10);
+        }
+        .fish-ai-quick {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            padding: 0 16px 12px;
+        }
+        .fish-ai-chip {
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 999px;
+            background: rgba(255,255,255,0.76);
+            color: #333;
+            padding: 6px 10px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+        .fish-ai-chip:hover,
+        .fish-ai-chip:focus-visible {
+            transform: translateY(-1px);
+            background: #fff;
+            outline: 2px dashed var(--accent, #111);
+            outline-offset: 2px;
+        }
+        .fish-ai-form {
+            display: flex;
+            gap: 8px;
+            padding: 13px;
+            border-top: 1px solid rgba(0,0,0,0.06);
+            background: rgba(255,255,255,0.74);
+        }
+        .fish-ai-input {
+            flex: 1;
+            min-width: 0;
+            border: 1px solid rgba(0,0,0,0.12);
+            border-radius: 999px;
+            padding: 11px 13px;
+            font-size: 0.95rem;
+            font-family: 'Noto Sans TC', sans-serif;
+            background: #fff;
+            color: #111;
+        }
+        .fish-ai-input:focus {
+            outline: 2px solid var(--accent-line, rgba(0,0,0,0.32));
+            outline-offset: 2px;
+        }
+        .fish-ai-send {
+            flex: 0 0 auto;
+            border: none;
+            border-radius: 999px;
+            padding: 0 14px;
+            background: #111;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .fish-ai-send:hover,
+        .fish-ai-send:focus-visible {
+            background: var(--accent, #111);
+            outline: 2px dashed #ffeb3b;
+            outline-offset: 3px;
+        }
+        body.zh-bpmf .fish-ai-widget {
+            font-family: 'GenYoGothic-Zhuyin', 'Noto Sans TC', sans-serif;
+        }
+        body.zh-bpmf .fish-ai-title {
+            font-family: 'GenYoMin-Zhuyin', 'Noto Serif TC', serif;
+        }
+        @media (max-width: 767px) {
+            .fish-ai-widget {
+                right: 14px;
+                bottom: 74px;
+            }
+            .fish-ai-toggle {
+                padding: 10px 13px 10px 11px;
+                font-size: 0.86rem;
+            }
+            .fish-ai-icon {
+                width: 28px;
+                height: 28px;
+            }
+            .fish-ai-panel {
+                bottom: 58px;
+                width: calc(100vw - 28px);
+                max-height: 68vh;
+                border-radius: 20px;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -957,7 +1263,7 @@
         <h2 class="serif-font">點擊畫面中你在意的地方，看看發生了什麼事！</h2>
         <div class="image-container">
             <img src="bg.png" 
-                 onerror="this.src='https://images.unsplash.com/photo-1582967788606-a171c1080cb0?q=80&w=1000&auto=format&fit=crop'" 
+                 onerror="this.onerror=null;this.src='assets/media/bottom-mud.png'" 
                  alt="漁塭現況示意圖">
             
             <div class="hotspot" id="area-1" data-label="01 水質" onclick="showContent(1)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showContent(1);}" tabindex="0" role="button" aria-label="神秘黑泥" title="神秘黑泥"><span class="hotspot-marker">01</span></div>
@@ -988,9 +1294,39 @@
         <a class="back-btn" onclick="goBack()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goBack();}" tabindex="0" role="button">返回探索圖片</a>
     </section>
 
+
+    <div class="fish-ai-widget" id="fish-ai-widget" aria-live="polite">
+        <section class="fish-ai-panel" id="fish-ai-panel" aria-label="魚塭 AI 小助手對話框">
+            <header class="fish-ai-header">
+                <div class="fish-ai-title-row">
+                    <div class="fish-ai-title">魚塭 AI 小助手</div>
+                    <button class="fish-ai-close" type="button" onclick="toggleFishAssistant(false)" aria-label="關閉魚塭 AI 小助手">×</button>
+                </div>
+                <p class="fish-ai-subtitle">可以問我文章重點、請我用更簡單的話說明，或請我依目前章節出題。</p>
+            </header>
+            <div class="fish-ai-messages" id="fish-ai-messages"></div>
+            <div class="fish-ai-quick" aria-label="快速提問">
+                <button class="fish-ai-chip" type="button" data-question="這章重點是什麼？">這章重點</button>
+                <button class="fish-ai-chip" type="button" data-question="幫我出3題">幫我出3題</button>
+                <button class="fish-ai-chip" type="button" data-question="優養化是什麼？">優養化</button>
+                <button class="fish-ai-chip" type="button" data-question="用更簡單的話說">更簡單說明</button>
+            </div>
+            <form class="fish-ai-form" id="fish-ai-form">
+                <input class="fish-ai-input" id="fish-ai-input" type="text" autocomplete="off" placeholder="輸入你的問題……" aria-label="輸入問題">
+                <button class="fish-ai-send" type="submit">送出</button>
+            </form>
+        </section>
+        <button class="fish-ai-toggle" id="fish-ai-toggle" type="button" onclick="toggleFishAssistant()" aria-controls="fish-ai-panel" aria-expanded="false">
+            <span class="fish-ai-icon" aria-hidden="true">🐟</span>
+            <span>魚塭 AI 小助手</span>
+        </button>
+    </div>
+
+
     <script>
         // 注音切換狀態
         let isBpmfMode = false;
+        let currentArticleId = null;
 
 
         const topicThemeClasses = ['topic-1','topic-2','topic-3','topic-4','topic-5','topic-6','topic-7'];
@@ -1075,10 +1411,18 @@
                 body: `<p>你有沒有經過魚塭時，聞過一股像「臭雞蛋」的刺鼻味道？或是看過池水變得像綠豆湯一樣，整片都綠油油的？其實這都是漁塭裡面的「隱形怪獸」搞得鬼。</p>
                        <h3>魚池裡的「隱形怪獸」是怎麼來的？</h3>
                        <p>為了解決大家愛吃海鮮的需求，現在的養殖場常常是「小小的池子，住著滿滿的魚蝦」。你可以想像一下，如果有一百個小朋友被擠在一間小教室裡，每天在裡面吃飯、上廁所，卻從不打掃，會發生什麼事？</p>
+                       <figure class="article-media media-right">
+                           <img src="assets/media/bottom-mud.png" alt="魚塭底泥與泥濘水面" loading="lazy" decoding="async">
+                           <figcaption>魚塭底部累積的黑泥，對應飼料、排泄物與有機物沉積後造成的水質壓力。</figcaption>
+                       </figure>
                        <p>沒錯，會變得又髒又臭。那漁塭也是一樣的概念。<strong>魚蝦吃不完的飼料、便便，還有不小心死掉的小水生動物</strong>，假如沒有清理掉的話，最後都會慢慢<strong>沉到池子最底下</strong>，<strong>變成</strong>一層又厚又臭的<strong>「底泥」</strong>。</p>
                        <p>當這些<strong>底泥</strong>在水底悶著、<strong>沒有氧氣</strong>的時候，<strong>細菌就會跑來分解它們，並且偷偷釋放出有毒的化學氣體</strong>（例如：氨氮、硫化氫）。這就是臭味的來源，也是讓水變髒、讓魚蝦生病的「隱形怪獸」！</p>
                        <h3>把怪獸變成「綠金」的神奇魔法</h3>
                        <p>以前的漁夫遇到水變髒，解決方法很簡單，就是把髒水通通抽掉，直接排進附近的小河裡。但是，這些充滿排泄物（髒東西）的髒水，會讓河川裡的藻類瘋狂生長，把水裡的氧氣都用光光。這在科學上叫做<strong>「優養化」，會害死河裡的其他小動物。</strong></p>
+                       <figure class="article-media media-left">
+                           <img src="assets/media/eutrophication.jpg" alt="河川優養化造成水體變綠" loading="lazy" decoding="async">
+                           <figcaption>優養化讓藻類大量繁殖，水體變綠，也可能讓水中的氧氣快速下降。</figcaption>
+                       </figure>
                        <p>為了解決這個環境危機，科學家想到了一個超棒的魔法，叫做<strong>「循環經濟」</strong>！</p>
                        <p>既然底泥和髒水裡面有很多營養，我們為什麼不把它們變成有用的東西呢？科學家發明了特殊的過濾機器，把髒水裡的固體底泥分離出來，經過發酵處理後，竟然變成了農夫種菜最愛用的超級有機肥料！</p>
                        <p>這樣一來，不但魚塭的水變乾淨了，原本讓人頭痛的<strong>「廢棄物」變成了可以賣錢的「資源」</strong>，達成保護環境的目的。</p>
@@ -1099,6 +1443,10 @@
                 title: "魚池裡的動物大亂鬥：該讓魚蝦交朋友，還是當獨行俠？",
                 body: `<p>想像一下你的班級，如果全班每一個人都只會畫畫，沒有人會算數學、沒有人會跑步，也沒有人會打掃，這個班級能順利運作嗎？</p>
                        <p>大自然的池塘也是一樣的！在<strong>很久以前，臺灣的魚塭</strong>裡非常熱鬧，<strong>住著各式各樣的魚、蝦子、螺類，還有綠綠的藻類</strong>，大家像一個大家庭一樣生活在一起。但在這幾十年來，魚池裡卻悄悄發生了巨大的變化。</p>
+                       <figure class="article-media media-left">
+                           <img src="assets/media/historical-fishpond.jpg" alt="日治時期魚塭老照片" loading="lazy" decoding="async">
+                           <figcaption>早期魚塭留下的影像，放在「過去的魚塭生態」段落，讓時間感自然接上文章。</figcaption>
+                       </figure>
                        <h3>獨行俠的危機：當池子裡只剩下一種魚</h3>
                        <p><strong>為了讓魚蝦長得又快又肥</strong>，好賣到市場上賺錢，許多漁夫阿伯開始改變作法。他們把魚塭裡的其他生物通通趕走，<strong>整個大池子裡只養一種動物</strong>。像是「只養一種魚」，或是「只養一種蝦」。而且，他們因為害怕其他小蟲或是藻類來搶食物和氧氣，他們甚至會<strong>撒下化學藥劑來清除</strong>這些「不速之客」。</p>
                        <p>一開始，這種「獨行俠」的方法真的賺到了錢。但是，問題很快就來了！</p>
@@ -1111,6 +1459,10 @@
                            <li>濾水器： 躲在泥土裡的<strong>文蛤和牡蠣</strong>，會<strong>把水裡的碎屑吸進去吃掉</strong>，讓水變得更乾淨。</li>
                        </ul>
                        <p>當大家分工合作，池水就會自動保持乾淨，漁夫再也不需要倒進可怕的化學藥劑了！這種健康環境養出來的魚，肉質反而更好吃。</p>
+                       <figure class="article-media media-right">
+                           <img src="assets/media/polyculture-clam-harvest.jpg" alt="混養魚塭中捕撈蛤蜊" loading="lazy" decoding="async">
+                           <figcaption>混養魚塭裡，文蛤等生物能扮演濾水與資源利用的角色。</figcaption>
+                       </figure>
                        <p>在臺南的七股，還有漁夫阿伯特別在冬天把水抽淺，故意留下一些小魚，請來過冬的「黑面琵鷺」飽餐一頓。這種愛護鳥類又保護環境的魚蝦，會獲得政府頒發的「環保標章」，在市場上可以賣到更好的價錢呢！</p>
                        <h3>大自然的貪吃鬼與漁夫的眼淚</h3>
                        <p>哇！讓不同的動物住在一起，聽起來像童話故事一樣美好。但為什麼還是有很多傳統的漁夫阿伯，拼了命也要反對呢？</p>
@@ -1129,12 +1481,20 @@
                        <p>在臺灣，養魚一直是一個「靠天吃飯」的辛苦工作。現在全球氣候變遷，天氣就像發脾氣的怪獸一樣，常常出現極端的可怕變化，這讓魚池裡的魚蝦們面臨了巨大的生存危機！</p>
                        <h3>魚池裡的「冰風暴」與「大水災」</h3>
                        <p>在 2016 年的冬天，臺灣發生了一場超可怕的「霸王級寒流」。當時南部的<strong>氣溫突然掉到只剩個位數</strong>，那些原本<strong>習慣溫暖天氣的虱目魚和石斑魚</strong>，就像沒穿外套一樣，在冰冷的水裡<strong>被活活凍死</strong>，水面上浮滿了魚的屍體，讓漁夫阿伯們看了好心痛。</p>
+                       <figure class="article-media media-right media-video">
+                           <video src="assets/media/cold-wave-fish-death.mp4" controls preload="metadata" playsinline></video>
+                           <figcaption>寒流造成魚塭漁獲死亡的新聞片段，對應「冰風暴」帶來的真實衝擊。</figcaption>
+                       </figure>
                        <p>除了寒流，夏天狂暴的颱風也是大威脅。現在的颱風常常帶著「超大豪雨」，短短幾個小時內，雨水就會讓<strong>魚塭的水滿出來</strong>。水壩一破，漁夫辛辛苦苦養大的<strong>魚</strong>，瞬間就<strong>跟著大水游走了</strong>！</p>
                        <h3>幫魚兒穿外套：科學家的「防護罩魔法」</h3>
                        <p>天氣越來越可怕，科學家告訴漁夫們：「我們不能再靠運氣了，必須幫魚蝦升級防護罩！」他們想出了兩個超酷的科學魔法：</p>
                        <ul>
                            <li>魔法一：蓋一條「深水禦寒毯」原本的魚池大約只有一個大人那麼深（1.5 公尺）。<strong>科學家建議把池子挖到兩倍深</strong>（3公尺）！因為<strong>越深的水，溫度的變化就越慢</strong>。當寒流來的時候，深層的水溫就像一條厚厚的保暖毯，可以保護魚蝦不被凍傷；大雨來的時候，也比較不會滿出來。</li>
                            <li>魔法二：打造超強的「室內水城堡」更厲害的方法，是直接<strong>幫魚池蓋一個有屋頂的溫室</strong>，甚至是完全封閉的室內工廠！裡面不但能擋風遮雨，還有冷暖氣可以控制水溫。住在城堡裡的魚，一年四季都能平平安安地長大，就算外面刮大風下大雨也不怕。</li>
+                       <figure class="article-media media-left">
+                           <img src="assets/media/greenhouse-fishpond.jpg" alt="有遮棚的溫室魚塭" loading="lazy" decoding="async">
+                           <figcaption>溫室魚塭像替魚蝦加上一層防護罩，能呼應文章中的「室內水城堡」。</figcaption>
+                       </figure>
                        </ul>
                        <h3>蓋城堡太貴了！漁夫阿伯的艱難選擇</h3>
                        <p>哇！有了「水城堡」，魚蝦就安全了，為什麼大家不趕快蓋呢？</p>
@@ -1150,11 +1510,23 @@
                        <p>魚蝦每天在水裡吃飯、大便，為了<strong>不讓水變得太髒、太毒</strong>，漁夫阿伯必須<strong>經常幫魚塭「換水」</strong>。可是，臺灣南部很多養魚的地方，附近根本沒有足夠的河水或水庫，那該怎麼辦呢？</p>
                        <h3>消失的地下水與沉沒的村莊</h3>
                        <p>在以前，漁夫們想到了一個方法：<strong>在地上打一口深深的井</strong>，插進一根「超級巨大的吸管」，<strong>把藏在泥土深處的「地下水」猛吸上來用</strong>。</p>
+                       <figure class="article-media media-right">
+                           <img src="assets/media/groundwater-pump.jpg" alt="地下水抽水管將水排入渠道" loading="lazy" decoding="async">
+                           <figcaption>抽取地下水的管線畫面，放在「超級巨大吸管」的比喻旁邊最直覺。</figcaption>
+                       </figure>
                        <p>一開始，這個方法看起來棒極了，地下水又多又乾淨。但是，大家幾十年來沒日沒夜地狂吸，<strong>地下水漸漸被抽乾了</strong>。<strong>失去了水的支撐</strong>，原本堅硬的土地就像洩了氣的皮球一樣，<strong>開始往下塌陷</strong>！這在科學上叫做<strong>「地層下陷」</strong>。</p>
+                       <figure class="article-media media-left">
+                           <img src="assets/media/land-subsidence.jpg" alt="地層下陷與水位變化的魚塭岸邊" loading="lazy" decoding="async">
+                           <figcaption>地層下陷與淹水風險，是長期超抽地下水後最具體的後果之一。</figcaption>
+                       </figure>
                        <p>在臺灣沿海的一些小村莊，土地甚至下陷了超過兩公尺！現在只要一下大雨，或是海水漲潮，海水就會倒灌進村子裡，連房子都泡在水裡。為了拯救沉沒的村莊，政府只好嚴格禁止大家再抽地下水。加上現在常常遇到乾旱不下雨，傳統的魚塭面臨了「無水可用」的超大危機！</p>
                        <h3>太空站的科技：一滴水用十次的魔法</h3>
                        <p>沒有水，難道就不養魚了嗎？科學家想到了一個超酷的解方，靈感竟然來自「太空站」！</p>
                        <p>太空人在太空中沒有水龍頭，他們洗澡、尿尿的水，都會經過特殊的機器過濾後，變成乾淨的水重新喝下肚。科學家把這種技術搬到了魚塭，發明了<strong>「循環水養殖系統」</strong>。</p>
+                       <figure class="article-media media-right">
+                           <img src="assets/media/recirculating-aquaculture.jpg" alt="室內循環水養殖池" loading="lazy" decoding="async">
+                           <figcaption>循環水養殖系統把水反覆處理後再使用，對應「一滴水用十次」的概念。</figcaption>
+                       </figure>
                        <p>這套神奇的系統就像一個超級濾水器，有三個厲害的關卡：</p>
                        <ol>
                            <li>物理濾網： 先把水裡<strong>大塊的魚大便和沒吃完的飼料攔截下來</strong>。</li>
@@ -1178,6 +1550,10 @@
                 body: `<p>如果讓你選一份未來的工作：一個是坐在有冷氣的辦公室裡，週休二日，每個月有固定的薪水；另一個是每天要在烈日下曬太陽、在寒流來時吹冷風，身上總是沾著魚腥味，而且只要颱風一來，賺的錢可能瞬間泡湯。你會選哪一個？</p>
                        <p>相信大部分的人都會選擇去城市裡吹冷氣吧！這就是臺灣漁村現在面臨的最大危機。</p>
                        <p>幾十年來，漁村裡的年輕人長大後，紛紛跑到大城市去上班。現在留在魚塭旁邊辛苦養魚的，幾乎都是滿頭白髮、平均年齡超過 60 歲的阿公阿嬤，有些甚至已經 80 歲了還在苦撐。當這些「白髮超級英雄」慢慢變老、體力衰退，再也搬不動沉重的飼料時，誰來接班養魚給我們吃呢？</p>
+                       <figure class="article-media media-left media-video">
+                           <video src="assets/media/aging-fishing-village.mp4" controls preload="metadata" playsinline></video>
+                           <figcaption>漁村高齡化的新聞片段，放在「白髮超級英雄」段落旁，讓社會問題更有畫面。</figcaption>
+                       </figure>
                        <h3>危機變成轉機？打造「超級大魚廠」</h3>
                        <p>看到漁村裡老人家越來越多，有一些經濟學家和科技大老闆反而覺得：「這或許是一個讓臺灣養魚技術『大升級』的好機會喔！」</p>
                        <p>為什麼呢？因為以前的魚塭都是「一家一小塊」，阿公阿嬤賺的錢不多，根本買不起厲害的環保機器或高科技設備。</p>
@@ -1195,12 +1571,20 @@
                 title: "魚塭頭頂上的「發電大傘」：一邊種電一邊養魚，真的可行嗎？",
                 body: `<p>為了保護地球、減少空氣污染，大家都在努力使用不會製造黑煙的「綠色能源」，比如太陽能。但是，臺灣的土地這麼小、人這麼多，哪來那麼大的空地可以放太陽能板呢？</p>
                        <p>這時候，有人把腦筋動到了<strong>南部廣大的魚塭</strong>上：「魚池那裡<strong>太陽超大</strong>，如果我們在<strong>魚池上面蓋太陽能板</strong>，不就可以『<strong>一邊發電、一邊養魚</strong>』了嗎？」這個聽起來一舉兩得的好點子，叫做「<strong>漁電共生</strong>」。</p>
+                       <figure class="article-media media-right">
+                           <img src="assets/media/solar-revenue.jpeg" alt="水面上的太陽能板支架" loading="lazy" decoding="async">
+                           <figcaption>魚塭上方架設太陽能板，對應「一邊發電、一邊養魚」的基本概念。</figcaption>
+                       </figure>
                        <p>為了保護魚兒，政府還特別規定：太陽能板不能把魚池全部蓋住，必須留下一大半的空間讓陽光照進來，而且養出來的魚不能變少太多，否則就不准賣電！</p>
                        <h3>太陽能板變成魚兒的「超級保護傘」</h3>
                        <p>對很多地主和支持這個計畫的人來說，這簡直是天上掉下來的禮物！</p>
                        <ul>
                            <li>超級防護罩： 夏天太陽太毒辣，水溫太高會把魚熱死；冬天寒流來，魚又會凍傷。水面上的太陽能板就像一把大傘，夏天幫魚兒<strong>遮陽</strong>，冬天幫忙<strong>擋住</strong>冰冷的<strong>狂風</strong>。</li>
                            <li>安定的零用錢： 養魚常常要看天氣，有時候遇到天災，魚死光了就沒錢賺。現在只要讓發電公司在魚池上蓋<strong>太陽能板</strong>，魚塭的主人每年都能<strong>拿到一筆很穩定的「租金」</strong>，還可以拿這筆錢來把破舊的魚池翻新，升級成更厲害的養殖場。</li>
+                       <figure class="article-media media-left">
+                           <img src="assets/media/qigu-solar-fishery.jpg" alt="臺南七股大面積漁電共生場域空拍" loading="lazy" decoding="async">
+                           <figcaption>大面積漁電共生空拍圖，放在利益與爭議交界處，讓規模感更清楚。</figcaption>
+                       </figure>
                        </ul>
                        <h3>太陽能大傘下的「陰影」</h3>
                        <p>哇！一邊賺電費、一邊養魚，這麼完美的點子，為什麼會在漁村裡引起超級大吵架，甚至讓環保團體抗議呢？原來，當大家發現「發電比養魚更好賺」的時候，事情就變調了：</p>
@@ -1224,6 +1608,10 @@
                        <h3>科技超能力：水底千里眼與聰明餵食器</h3>
                        <p>為了解決這個大麻煩，科技專家們帶著厲害的「電腦」和「機器人」來到漁村，準備幫阿伯們來一場「科技大變身」！</p>
                        <p>專家們把許多<strong>高科技的感測器放進水裡</strong>，就像在水底安裝了「千里眼」。現在，漁夫阿伯不用半夜起床吹冷風了，<strong>只要躺在床上打開手機 APP，就能看到水裡有多冷、氧氣夠不夠</strong>。如果水裡的<strong>氧氣突然變少，手機會「嗶嗶嗶」大叫</strong>，還能<strong>自動遙控打開打水車</strong>，是不是超級方便？</p>
+                       <figure class="article-media media-right">
+                           <img src="assets/media/smart-aquaculture.jpg" alt="研究人員在養殖池旁操作監測設備" loading="lazy" decoding="async">
+                           <figcaption>科技養殖場景，對應感測器、監控設備與智慧管理。</figcaption>
+                       </figure>
                        <p>除了千里眼，還有超厲害的「<strong>AI 聰明餵食器</strong>」。以前阿伯撒飼料，常常不小心撒太多，魚吃不完沉到水底，就會把水弄髒。現在的 AI 攝影機就像一個厲害的保母，它會<strong>盯著魚群看</strong>：「嗯，大家游得很激動，<strong>肚子餓了</strong>，趕快<strong>放飼料</strong>！」、「喔？大家游得很慢，<strong>吃飽了</strong>，馬上<strong>停止餵食</strong>！」這樣不但省下了飼料錢，水也變乾淨了。</p>
                        <p>看到養魚變得這麼有科技感，很多年輕人覺得：「哇！原來養魚也可以像在基地裡控制機器人一樣酷！」於是他們開始願意回到家鄉，成為新一代的「科技漁夫」。</p>
                        <h3>機器人水土不服？阿公的科技大挑戰</h3>
@@ -1277,6 +1665,7 @@
             const interactive = document.getElementById('interactive-section');
             const content = document.getElementById('content-section');
             document.body.classList.add('article-mode');
+            currentArticleId = id;
 
             // 淡出首頁與互動圖片區塊
             hideSection(home);
@@ -1307,6 +1696,7 @@
             const content = document.getElementById('content-section');
             setActiveTopic(null);
             document.body.classList.remove('article-mode');
+            currentArticleId = null;
 
             // 淡出文章區塊
             hideSection(content);
@@ -1326,6 +1716,7 @@
         // 不經過轉場動畫，直接跳到指定文章（用於分享連結開啟時）
         function jumpToArticleInstant(id) {
             document.body.classList.add('article-mode');
+            currentArticleId = id;
             document.getElementById('home-section').style.display = 'none';
             document.getElementById('interactive-section').style.display = 'none';
 
@@ -1360,6 +1751,121 @@
             } else {
                 history.replaceState({ articleId: null }, '', window.location.pathname);
             }
+        })();
+
+
+        /* ===== 魚塭 AI 小助手：真正 AI API 連線版 =====
+           將 FISHPOND_AI_ENDPOINT 填入自己的 Vercel API 中繼網址。
+           注意：不要把 Gemini / OpenAI API Key 直接放在 HTML 裡。 */
+        const FISHPOND_AI_ENDPOINT = '';
+
+        // 已移除原本的本機預設回答資料。
+        // 目前魚塭 AI 小助手只會呼叫 FISHPOND_AI_ENDPOINT 指定的後端 API。
+
+        function toggleFishAssistant(forceOpen) {
+            const widget = document.getElementById('fish-ai-widget');
+            const toggle = document.getElementById('fish-ai-toggle');
+            const input = document.getElementById('fish-ai-input');
+            if (!widget || !toggle) return;
+            const open = typeof forceOpen === 'boolean' ? forceOpen : !widget.classList.contains('is-open');
+            widget.classList.toggle('is-open', open);
+            toggle.setAttribute('aria-expanded', String(open));
+            if (open) {
+                initFishAssistantGreeting();
+                setTimeout(() => input && input.focus(), 120);
+            }
+        }
+
+        function addFishMessage(role, text) {
+            const messages = document.getElementById('fish-ai-messages');
+            if (!messages) return;
+            const bubble = document.createElement('div');
+            bubble.className = 'fish-ai-message ' + role;
+            bubble.textContent = text;
+            messages.appendChild(bubble);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function initFishAssistantGreeting() {
+            const messages = document.getElementById('fish-ai-messages');
+            if (!messages || messages.dataset.started === 'true') return;
+            messages.dataset.started = 'true';
+            addFishMessage('bot', '嗨，我是魚塭 AI 小助手。\n我會依照這個網頁的文章內容回答你，也可以幫你整理重點或出題。');
+        }
+
+        function getCurrentTopicName() {
+            if (!currentArticleId || !articles[currentArticleId]) return '目前還在探索頁';
+            return articles[currentArticleId].title;
+        }
+
+        function buildCurrentArticleText() {
+            if (!currentArticleId || !articles[currentArticleId]) return '';
+            const tmp = document.createElement('div');
+            tmp.innerHTML = articles[currentArticleId].body;
+            return tmp.textContent.replace(/\s+/g, ' ').trim();
+        }
+
+        async function getFishAssistantReply(question) {
+            const q = (question || '').trim();
+            if (!q) return '請先輸入你的問題。';
+
+            if (!FISHPOND_AI_ENDPOINT) {
+                return 'AI 小助手尚未連接到後端 API。請先把 Vercel 產生的 /api/fish-ai 網址填到 FISHPOND_AI_ENDPOINT。';
+            }
+
+            try {
+                const res = await fetch(FISHPOND_AI_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        question: q,
+                        currentArticleId,
+                        currentTitle: getCurrentTopicName(),
+                        currentArticleText: buildCurrentArticleText()
+                    })
+                });
+
+                if (!res.ok) throw new Error('AI endpoint error');
+
+                const data = await res.json();
+                return data.answer || data.reply || 'AI 小助手沒有回傳答案，請再問一次。';
+            } catch (error) {
+                return 'AI 小助手目前連不上後端，請確認 Vercel 部署完成、GEMINI_API_KEY 已設定，且 FISHPOND_AI_ENDPOINT 網址正確。';
+            }
+        }
+
+        async function submitFishQuestion(question) {
+            const input = document.getElementById('fish-ai-input');
+            const q = (question || (input ? input.value : '') || '').trim();
+            if (!q) return;
+            if (input) input.value = '';
+            initFishAssistantGreeting();
+            addFishMessage('user', q);
+            addFishMessage('bot', '思考中……');
+            const messages = document.getElementById('fish-ai-messages');
+            const thinking = messages ? messages.lastElementChild : null;
+            const answer = await getFishAssistantReply(q);
+            if (thinking) thinking.textContent = answer;
+            if (messages) messages.scrollTop = messages.scrollHeight;
+        }
+
+        (function initFishAssistantUI() {
+            const form = document.getElementById('fish-ai-form');
+            if (form) {
+                form.addEventListener('submit', (event) => {
+                    event.preventDefault();
+                    submitFishQuestion();
+                });
+            }
+            document.querySelectorAll('.fish-ai-chip').forEach((chip) => {
+                chip.addEventListener('click', () => {
+                    toggleFishAssistant(true);
+                    submitFishQuestion(chip.dataset.question || chip.textContent);
+                });
+            });
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') toggleFishAssistant(false);
+            });
         })();
 
 
