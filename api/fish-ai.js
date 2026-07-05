@@ -41,7 +41,7 @@ export default async function handler(req, res) {
 ${currentTitle}
 
 目前文章內容：
-${currentArticleText.slice(0, 6000)}
+${currentArticleText.slice(0, 4000)}
 
 學生問題：
 ${question}
@@ -54,8 +54,10 @@ ${question}
 `;
 
   try {
+    const model = 'gemini-2.5-flash-lite';
+
     const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: {
@@ -78,6 +80,7 @@ ${question}
       return res.status(200).json({
         answer:
           '後端有成功連到 Gemini，但 Gemini 回傳錯誤：\n\n' +
+          '模型：' + model + '\n\n' +
           '狀態碼：' + geminiRes.status + '\n\n' +
           '錯誤訊息：' + (data?.error?.message || JSON.stringify(data))
       });
