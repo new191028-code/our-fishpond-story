@@ -1,101 +1,1898 @@
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我們的漁塭發生了什麼事</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Noto+Serif+TC:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 注音字型載入 (使用同資料夾下的本機字型檔案) */
+        @font-face {
+            font-family: 'GenYoMin-Zhuyin';
+            src: url('BpmfGenYoMin-R.ttf') format('truetype'),
+                 url('BpmfGenYoMin-R (2).ttf') format('truetype'),
+                 url('BpmfGenYoMin-R (1).ttf') format('truetype');
+            font-weight: 400; /* 常規體 */
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'GenYoMin-Zhuyin';
+            src: url('BpmfGenYoMin-B.ttf') format('truetype'),
+                 url('BpmfGenYoMin-B (2).ttf') format('truetype'),
+                 url('BpmfGenYoMin-B (1).ttf') format('truetype');
+            font-weight: 700; /* 粗體 */
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'GenYoGothic-Zhuyin';
+            src: url('BpmfGenYoGothic-R.ttf') format('truetype'),
+                 url('BpmfGenYoGothic-R (2).ttf') format('truetype'),
+                 url('BpmfGenYoGothic-R (1).ttf') format('truetype');
+            font-weight: 400; /* 常規體 */
+            font-display: swap;
+        }
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+        /* 全域設定 */
+        body {
+            background-color: #FFFFFF;
+            color: #000000;
+            font-family: 'Noto Sans TC', sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            scroll-behavior: smooth;
+            transition: font-size 0.35s ease;
+        }
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({
-      answer: '這個 API 只接受 POST 請求。'
-    });
-  }
-
-  const apiKey = process.env.GEMINI_API_KEY || process.env.Gemini_API_KEY;
-
-  if (!apiKey) {
-    return res.status(200).json({
-      answer: '後端有連到，但找不到 Gemini API Key。請確認 Vercel Environment Variables 裡有 Gemini_API_KEY 或 GEMINI_API_KEY。'
-    });
-  }
-
-  let body = {};
-  try {
-    body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
-  } catch (error) {
-    return res.status(200).json({
-      answer: '後端有連到，但前端送來的資料格式不是正確 JSON。'
-    });
-  }
-
-  const question = body.question || '你是誰';
-  const currentTitle = body.currentTitle || '目前還在探索頁';
-  const currentArticleText = body.currentArticleText || '';
-
-  const prompt = `
-你是「魚塭 AI 小助手」，請用繁體中文回答，對象是國小學生。
-
-目前章節：
-${currentTitle}
-
-目前文章內容：
-${currentArticleText.slice(0, 4000)}
-
-學生問題：
-${question}
-
-回答規則：
-1. 回答要簡單、親切、清楚。
-2. 如果學生問重點，整理成 3 到 5 點。
-3. 如果學生問出題，請出 3 題問答題並附答案。
-4. 不要亂編文章沒有的資料。
-`;
-
-  try {
-    const model = 'gemini-2.5-flash';
-
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: 'user',
-              parts: [{ text: prompt }]
+        /* 尊重使用者的減少動態偏好設定 */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
             }
-          ]
-        })
-      }
-    );
+        }
 
-    const data = await geminiRes.json();
+        /* 標題字體設定 */
+        h1, h2, h3, .serif-font {
+            font-family: 'Noto Serif TC', serif;
+            font-weight: 700;
+        }
 
-    if (!geminiRes.ok) {
-      return res.status(200).json({
-        answer:
-          '後端有成功連到 Gemini，但 Gemini 回傳錯誤：\n\n' +
-          '模型：' + model + '\n\n' +
-          '狀態碼：' + geminiRes.status + '\n\n' +
-          '錯誤訊息：' + (data?.error?.message || JSON.stringify(data))
-      });
-    }
+        /* 注音模式樣式覆寫 */
+        body.zh-bpmf {
+            font-family: 'GenYoGothic-Zhuyin', 'Noto Sans TC', sans-serif;
+            font-size: 1.1em; /* 注音字體視覺較小，稍微放大一點 */
+        }
+        body.zh-bpmf h1, 
+        body.zh-bpmf h2, 
+        body.zh-bpmf h3, 
+        body.zh-bpmf .serif-font,
+        body.zh-bpmf .category-label {
+            font-family: 'GenYoMin-Zhuyin', 'Noto Serif TC', serif;
+        }
+        body.zh-bpmf #content-section p,
+        body.zh-bpmf #content-section li {
+            line-height: 2.2; /* 增加行距，避免注音互相打架 */
+        }
 
-    const answer =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      'Gemini 有回應，但沒有產生文字答案。';
+        /* 懸浮的語言切換按鈕 */
+        #lang-toggle-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        #lang-toggle-btn:hover {
+            background-color: #333;
+            transform: translateY(-2px);
+        }
+        #lang-toggle-btn:focus-visible {
+            outline: 3px dashed #ffeb3b;
+            outline-offset: 3px;
+        }
 
-    return res.status(200).json({ answer });
-  } catch (error) {
-    return res.status(200).json({
-      answer:
-        '後端執行時發生錯誤：\n\n' +
-        String(error?.message || error)
-    });
-  }
-}
+        /* 區塊淡入淡出轉場 */
+        .fade-section {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .fade-section.is-hidden {
+            opacity: 0;
+            transform: translateY(18px);
+            pointer-events: none;
+        }
+
+        /* 首頁區塊 */
+        #home-section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        #home-section h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+
+        @media (min-width: 768px) {
+            #home-section h1 {
+                font-size: 4rem;
+            }
+        }
+
+        .scroll-hint {
+            font-size: 1.2rem;
+            color: #666;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+
+        /* 互動圖片區塊 */
+        #interactive-section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            background-color: #f9f9f9;
+        }
+
+        .image-container {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        .image-container img {
+            width: 100%;
+            display: block;
+            border-radius: 8px;
+            object-fit: cover;
+            filter: grayscale(45%) contrast(1.04) brightness(0.99);
+            transition: filter 1.2s ease;
+        }
+        .image-container.is-revealed img {
+            filter: grayscale(0%) contrast(1) brightness(1);
+        }
+
+        /* 熱區設定 (對應 1-7) */
+        .hotspot {
+            position: absolute;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            min-width: 48px;
+            min-height: 48px;
+        }
+
+        .hotspot:hover,
+        .hotspot:focus-visible {
+            border: 3px dashed #ffeb3b;
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(255, 235, 59, 0.5);
+            outline: none;
+        }
+
+        /* 熱區數字標記，呼應內文 01-07 的分類編號 */
+        .hotspot-marker {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            color: #fff;
+            font-family: 'Noto Serif TC', serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            animation: marker-breathe 2.6s ease-in-out infinite;
+        }
+
+        .hotspot:hover .hotspot-marker,
+        .hotspot:focus-visible .hotspot-marker {
+            background-color: #ffeb3b;
+            border-color: #000;
+            color: #000;
+            animation-play-state: paused;
+        }
+
+        @keyframes marker-breathe {
+            0%, 100% { opacity: 0.65; box-shadow: 0 0 0 0 rgba(255,255,255,0.35); }
+            50% { opacity: 1; box-shadow: 0 0 0 6px rgba(255,255,255,0); }
+        }
+
+        /* 依據手繪圖抓取的粗略相對位置 (top, left, width, height) */
+        #area-1 { top: 65%; left: 5%; width: 45%; height: 30%; }
+        #area-2 { top: 50%; left: 15%; width: 30%; height: 15%; }
+        #area-3 { top: 5%; left: 10%; width: 80%; height: 20%; }
+        #area-4 { top: 35%; left: 8%; width: 30%; height: 15%; }
+        #area-6 { top: 25%; left: 60%; width: 35%; height: 20%; }
+        /* area-5 和 area-7 已移至下方使用者指定修正區，避免重複 */
+
+        /* 文章內容區塊 */
+        #content-section {
+            display: none; /* 預設隱藏，點擊後顯示 */
+            padding: 60px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        /* 左上角標籤樣式 */
+        .category-label {
+            color: #888888;
+            font-size: 1.1rem;
+            letter-spacing: 0.3em;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        #content-section h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
+        
+        @media (min-width: 768px) {
+            #content-section h2 {
+                font-size: 2.5rem;
+            }
+        }
+
+        #content-section p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            text-align: justify;
+            transition: line-height 0.35s ease;
+        }
+
+        #content-section h3 {
+            font-size: 1.5rem;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            color: #222;
+        }
+
+        #content-section ul, #content-section ol {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            padding-left: 30px;
+            line-height: 1.6;
+            transition: line-height 0.35s ease;
+        }
+
+        #content-section li {
+            margin-bottom: 10px;
+        }
+
+        /* 文章段落滾動淡入效果 */
+        #article-body > * {
+            opacity: 0;
+            transform: translateY(22px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        #article-body > *.reveal-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 參考來源區塊 */
+        #article-body .article-references {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        #article-body .article-references h4 {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #999;
+            margin: 0 0 12px 0;
+        }
+        #article-body .article-references ol {
+            font-size: 0.85rem;
+            line-height: 1.7;
+            color: #777;
+            padding-left: 20px;
+            margin: 0;
+        }
+        #article-body .article-references li {
+            margin-bottom: 8px;
+        }
+        #article-body .article-references a {
+            color: #777;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            word-break: break-all;
+            transition: color 0.2s ease;
+        }
+        #article-body .article-references a:hover,
+        #article-body .article-references a:focus-visible {
+            color: #000;
+        }
+
+        body.zh-bpmf #article-body .article-references {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        body.zh-bpmf #article-body .article-references p,
+        body.zh-bpmf #article-body .article-references li {
+            line-height: 1.7;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 10px 20px;
+            background-color: #000;
+            color: #FFF;
+            text-decoration: none;
+            font-weight: 700;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .back-btn:hover {
+            background-color: #333;
+        }
+        .back-btn:focus-visible {
+            outline: 3px dashed #ffeb3b;
+            outline-offset: 3px;
+        }
+
+
+        /* ===== Editorial motion layer: subtle magazine-style refinements ===== */
+        :root {
+            --ink: #111111;
+            --paper: #ffffff;
+            --mist: #f5f5f1;
+            --accent: #7b8f92;
+            --accent-soft: rgba(123, 143, 146, 0.18);
+            --accent-line: rgba(123, 143, 146, 0.45);
+            --water: #6f8f9f;
+            --ecology: #7d8f63;
+            --climate: #8f949c;
+            --resources: #9a7662;
+            --society: #b57d55;
+            --energy: #a8874a;
+            --technology: #596574;
+        }
+
+        body.topic-1 { --accent: var(--water); --accent-soft: rgba(111,143,159,0.18); --accent-line: rgba(111,143,159,0.48); }
+        body.topic-2 { --accent: var(--ecology); --accent-soft: rgba(125,143,99,0.18); --accent-line: rgba(125,143,99,0.48); }
+        body.topic-3 { --accent: var(--climate); --accent-soft: rgba(143,148,156,0.20); --accent-line: rgba(143,148,156,0.50); }
+        body.topic-4 { --accent: var(--resources); --accent-soft: rgba(154,118,98,0.18); --accent-line: rgba(154,118,98,0.48); }
+        body.topic-5 { --accent: var(--society); --accent-soft: rgba(181,125,85,0.18); --accent-line: rgba(181,125,85,0.48); }
+        body.topic-6 { --accent: var(--energy); --accent-soft: rgba(168,135,74,0.18); --accent-line: rgba(168,135,74,0.48); }
+        body.topic-7 { --accent: var(--technology); --accent-soft: rgba(89,101,116,0.18); --accent-line: rgba(89,101,116,0.48); }
+
+        #reading-progress {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 0%;
+            height: 3px;
+            z-index: 200;
+            background: var(--accent);
+            transition: width 0.12s linear, background-color 0.25s ease;
+        }
+
+        #home-section {
+            position: relative;
+            overflow: hidden;
+            color: #fff;
+            background-color: #171916;
+            isolation: isolate;
+        }
+        #home-section::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(180deg, rgba(10,12,12,0.25), rgba(10,12,12,0.72)),
+                linear-gradient(90deg, rgba(0,0,0,0.45), rgba(0,0,0,0.05), rgba(0,0,0,0.45)),
+                url('bg.png') center / cover no-repeat,
+                url('assets/media/bottom-mud.png') center / cover no-repeat;
+            filter: grayscale(52%) contrast(1.05) brightness(0.82);
+            transform: scale(1.025);
+            z-index: -3;
+            animation: cover-breathe 18s ease-in-out infinite alternate;
+        }
+        #home-section::after {
+            content: "";
+            position: absolute;
+            inset: auto 0 0 0;
+            height: 36%;
+            background:
+                radial-gradient(ellipse at 35% 40%, rgba(255,255,255,0.15), transparent 34%),
+                repeating-linear-gradient(172deg, rgba(255,255,255,0.06) 0 1px, transparent 1px 18px);
+            opacity: 0.28;
+            mix-blend-mode: screen;
+            z-index: -1;
+            animation: water-surface 8s ease-in-out infinite alternate;
+        }
+        @keyframes cover-breathe {
+            from { transform: scale(1.025) translate3d(0,0,0); }
+            to { transform: scale(1.045) translate3d(-0.6%, -0.4%, 0); }
+        }
+        @keyframes water-surface {
+            from { transform: translateX(-0.4%); opacity: 0.22; }
+            to { transform: translateX(0.8%); opacity: 0.34; }
+        }
+
+        #home-section h1 {
+            max-width: 920px;
+            margin: 0 auto 22px auto;
+            text-shadow: 0 16px 42px rgba(0,0,0,0.55);
+            letter-spacing: 0.08em;
+        }
+        #home-section h1 .title-char {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(22px);
+            animation: title-rise 0.72s ease forwards;
+            animation-delay: calc(var(--i) * 0.055s);
+        }
+        @keyframes title-rise {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .scroll-hint {
+            color: rgba(255,255,255,0.78);
+            letter-spacing: 0.16em;
+            font-size: 0.95rem;
+            text-shadow: 0 8px 22px rgba(0,0,0,0.55);
+        }
+
+        .cover-motion {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+        .cover-bird {
+            position: absolute;
+            left: -12vw;
+            top: var(--top, 18%);
+            width: var(--size, 86px);
+            height: auto;
+            opacity: var(--op, 0.55);
+            filter: drop-shadow(0 8px 10px rgba(0,0,0,0.28));
+            animation: bird-cross var(--duration, 18s) linear infinite;
+            animation-delay: var(--delay, 0s);
+        }
+        .cover-bird path { stroke: rgba(255,255,255,0.86); }
+        .cover-bird.b2 { --top: 21%; --size: 68px; --duration: 22s; --delay: 4.8s; --op: 0.42; }
+        .cover-bird.b3 { --top: 14%; --size: 54px; --duration: 24s; --delay: 9s; --op: 0.34; }
+        @keyframes bird-cross {
+            0% { transform: translateX(-10vw) translateY(0) scale(0.86); }
+            42% { transform: translateX(46vw) translateY(-18px) scale(1); }
+            100% { transform: translateX(122vw) translateY(12px) scale(0.9); }
+        }
+
+        .egret-dive {
+            position: absolute;
+            left: -8vw;
+            top: 18%;
+            width: 96px;
+            opacity: 0.46;
+            offset-path: path('M 0 40 C 260 0, 520 90, 640 250 S 880 365, 1180 245');
+            animation: egret-hunt 16s cubic-bezier(.42,0,.24,1) infinite 2.2s;
+            filter: drop-shadow(0 8px 14px rgba(0,0,0,0.26));
+        }
+        .egret-dive path { stroke: rgba(255,255,255,0.82); }
+        .fish-catch {
+            position: absolute;
+            left: 58%;
+            top: 68%;
+            width: 32px;
+            height: 16px;
+            border: 1.5px solid rgba(255,255,255,0.42);
+            border-radius: 50%;
+            opacity: 0;
+            transform: rotate(-18deg);
+            animation: fish-glint 16s ease-in-out infinite 2.2s;
+        }
+        .fish-catch::after {
+            content: "";
+            position: absolute;
+            right: -8px;
+            top: 3px;
+            border-left: 9px solid rgba(255,255,255,0.36);
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+        }
+        @keyframes egret-hunt {
+            0% { offset-distance: 0%; transform: rotate(3deg) scale(0.86); opacity: 0; }
+            10% { opacity: 0.42; }
+            45% { transform: rotate(11deg) scale(1); opacity: 0.52; }
+            56% { transform: rotate(-5deg) scale(1.04); opacity: 0.50; }
+            78% { opacity: 0.36; }
+            100% { offset-distance: 100%; transform: rotate(-8deg) scale(0.84); opacity: 0; }
+        }
+        @keyframes fish-glint {
+            0%, 43%, 58%, 100% { opacity: 0; transform: translateY(0) rotate(-18deg) scale(0.8); }
+            49% { opacity: 0.44; transform: translateY(-10px) rotate(-18deg) scale(1); }
+            54% { opacity: 0.15; transform: translate(42px, -30px) rotate(-8deg) scale(0.72); }
+        }
+
+        .pump-water {
+            position: absolute;
+            left: 5.4%;
+            top: 51.8%;
+            width: 26%;
+            height: 20%;
+            opacity: 0.22;
+            background: radial-gradient(ellipse at left center, rgba(255,255,255,0.72), rgba(255,255,255,0.12) 42%, transparent 70%);
+            clip-path: polygon(0 42%, 100% 18%, 100% 34%, 0 62%);
+            filter: blur(2px);
+            transform-origin: left center;
+            animation: pump-flow 1.8s ease-in-out infinite;
+        }
+        .pond-ripple {
+            position: absolute;
+            left: var(--x, 22%);
+            top: var(--y, 70%);
+            width: var(--s, 100px);
+            height: calc(var(--s, 100px) * .38);
+            border: 1px solid rgba(255,255,255,0.28);
+            border-radius: 50%;
+            opacity: 0;
+            animation: ripple-soft 5.8s ease-out infinite;
+            animation-delay: var(--d, 0s);
+        }
+        .pond-ripple.r2 { --x: 36%; --y: 74%; --s: 140px; --d: 1.7s; }
+        .pond-ripple.r3 { --x: 14%; --y: 63%; --s: 78px; --d: 3.4s; }
+        @keyframes pump-flow {
+            0%, 100% { transform: rotate(-1deg) scaleX(0.96); opacity: 0.18; }
+            50% { transform: rotate(1.5deg) scaleX(1.06); opacity: 0.27; }
+        }
+        @keyframes ripple-soft {
+            0% { transform: scale(0.4); opacity: 0; }
+            18% { opacity: 0.24; }
+            100% { transform: scale(1.45); opacity: 0; }
+        }
+
+        #interactive-section {
+            background:
+                radial-gradient(circle at 12% 10%, rgba(111,143,159,0.10), transparent 32%),
+                linear-gradient(180deg, #fbfbf8, #f2f2ee);
+        }
+        #interactive-section h2 {
+            max-width: 920px;
+            text-align: center;
+            font-size: clamp(1.7rem, 4vw, 3rem);
+            line-height: 1.25;
+            margin-bottom: 10px;
+        }
+        #interactive-section h2::after {
+            content: "";
+            display: block;
+            width: 72px;
+            height: 1px;
+            margin: 18px auto 0;
+            background: rgba(0,0,0,0.32);
+        }
+        .image-container {
+            overflow: hidden;
+            border-radius: 14px;
+            background: #ddd;
+        }
+        .image-container::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.12)),
+                radial-gradient(circle at 18% 72%, rgba(255,255,255,0.08), transparent 26%);
+            opacity: 0.86;
+        }
+        .hotspot {
+            border-radius: 999px;
+        }
+        .hotspot::after {
+            content: attr(data-label);
+            position: absolute;
+            left: 50%;
+            bottom: calc(100% + 10px);
+            transform: translateX(-50%) translateY(6px);
+            white-space: nowrap;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.86);
+            border: 1px solid rgba(0,0,0,0.08);
+            color: #111;
+            font-size: 0.76rem;
+            letter-spacing: 0.06em;
+            opacity: 0;
+            pointer-events: none;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.14);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+        .hotspot:hover::after,
+        .hotspot:focus-visible::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .hotspot-marker {
+            width: 34px;
+            height: 34px;
+            background-color: rgba(255,255,255,0.20);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255,255,255,0.72);
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.45);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+        }
+        #area-1 .hotspot-marker { box-shadow: 0 0 0 1px var(--water), 0 12px 24px rgba(0,0,0,0.18); }
+        #area-2 .hotspot-marker { box-shadow: 0 0 0 1px var(--ecology), 0 12px 24px rgba(0,0,0,0.18); }
+        #area-3 .hotspot-marker { box-shadow: 0 0 0 1px var(--climate), 0 12px 24px rgba(0,0,0,0.18); }
+        #area-4 .hotspot-marker { box-shadow: 0 0 0 1px var(--resources), 0 12px 24px rgba(0,0,0,0.18); }
+        #area-5 .hotspot-marker { box-shadow: 0 0 0 1px var(--society), 0 12px 24px rgba(0,0,0,0.18); }
+        #area-6 .hotspot-marker { box-shadow: 0 0 0 1px var(--energy), 0 12px 24px rgba(0,0,0,0.18); }
+        #area-7 .hotspot-marker { box-shadow: 0 0 0 1px var(--technology), 0 12px 24px rgba(0,0,0,0.18); }
+
+        .topic-guide {
+            width: min(100%, 1000px);
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 8px;
+            margin: 18px auto 0;
+        }
+        .topic-chip {
+            border: 1px solid rgba(0,0,0,0.08);
+            background: rgba(255,255,255,0.72);
+            border-radius: 999px;
+            padding: 8px 10px;
+            cursor: pointer;
+            color: #222;
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 0.82rem;
+            letter-spacing: 0.04em;
+            box-shadow: 0 8px 22px rgba(0,0,0,0.04);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+        }
+        .topic-chip span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+            background: var(--chip-color, #999);
+        }
+        .topic-chip:hover,
+        .topic-chip:focus-visible {
+            transform: translateY(-2px);
+            background: #fff;
+            box-shadow: 0 14px 28px rgba(0,0,0,0.09);
+            outline: 2px dashed var(--chip-color, #999);
+            outline-offset: 3px;
+        }
+        .chip-1 { --chip-color: var(--water); }
+        .chip-2 { --chip-color: var(--ecology); }
+        .chip-3 { --chip-color: var(--climate); }
+        .chip-4 { --chip-color: var(--resources); }
+        .chip-5 { --chip-color: var(--society); }
+        .chip-6 { --chip-color: var(--energy); }
+        .chip-7 { --chip-color: var(--technology); }
+
+        #content-section {
+            position: relative;
+            max-width: 880px;
+            padding-top: 84px;
+        }
+        #content-section::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 82% 18%, var(--accent-soft), transparent 30%),
+                linear-gradient(90deg, transparent, rgba(0,0,0,0.015));
+            z-index: -1;
+        }
+        .category-label {
+            color: var(--accent);
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .category-label::before {
+            content: "";
+            width: 42px;
+            height: 1px;
+            background: var(--accent);
+        }
+        #content-section h2 {
+            border-bottom-color: var(--accent-line);
+            text-wrap: balance;
+        }
+        #article-body h3 {
+            position: relative;
+            padding-left: 18px;
+        }
+        #article-body h3::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0.25em;
+            bottom: 0.2em;
+            width: 4px;
+            border-radius: 999px;
+            background: var(--accent);
+            opacity: 0.82;
+        }
+        .pull-quote {
+            margin: 34px 0;
+            padding: 22px 26px;
+            border-left: 4px solid var(--accent);
+            background: linear-gradient(90deg, var(--accent-soft), rgba(255,255,255,0));
+            font-family: 'Noto Serif TC', serif;
+            font-size: clamp(1.36rem, 3.5vw, 2.2rem);
+            line-height: 1.55;
+            letter-spacing: 0.03em;
+            color: #111;
+        }
+        .pull-quote cite {
+            display: block;
+            margin-top: 12px;
+            font-family: 'Noto Sans TC', sans-serif;
+            font-style: normal;
+            font-size: 0.82rem;
+            color: #777;
+            letter-spacing: 0.12em;
+        }
+        #article-body strong {
+            text-decoration: underline;
+            text-decoration-color: var(--accent-line);
+            text-decoration-thickness: 0.18em;
+            text-underline-offset: 0.18em;
+        }
+        #article-body li::marker {
+            color: var(--accent);
+            font-weight: 700;
+        }
+        .back-btn {
+            background: var(--ink);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), 0 12px 24px rgba(0,0,0,0.08);
+        }
+        .back-btn:hover,
+        .back-btn:focus-visible {
+            background: var(--accent);
+        }
+
+        @media (max-width: 767px) {
+            #lang-toggle-btn {
+                top: auto;
+                right: 14px;
+                bottom: 14px;
+                padding: 9px 14px;
+                font-size: 0.9rem;
+            }
+            #home-section h1 {
+                font-size: 2.6rem;
+                letter-spacing: 0.04em;
+            }
+            .cover-bird { --size: 56px; }
+            .egret-dive { width: 62px; opacity: 0.32; }
+            .topic-guide {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .topic-chip {
+                border-radius: 12px;
+                text-align: left;
+            }
+            .hotspot::after { display: none; }
+            .hotspot-marker {
+                width: 30px;
+                height: 30px;
+                font-size: 0.78rem;
+            }
+            #content-section p,
+            #content-section ul,
+            #content-section ol {
+                font-size: 1.1rem;
+            }
+        }
+
+
+        /* ===== 使用者指定修正：標題排版、熱區 05/07、注音標籤字體 ===== */
+        #interactive-section h2 {
+            width: min(100%, 1500px);
+            max-width: none;
+            white-space: nowrap;
+            font-size: clamp(1.55rem, 3.6vw, 4.2rem);
+        }
+
+        #home-section h1.cover-title {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.08em;
+            line-height: 1.18;
+            max-width: min(92vw, 1100px);
+        }
+        #home-section h1.cover-title .title-line {
+            display: block;
+            white-space: nowrap;
+        }
+        body.zh-bpmf #home-section h1.cover-title {
+            gap: 0.14em;
+            line-height: 1.72;
+        }
+
+        /* 05 社會：號碼圈選白髮老人全身；07 科技：號碼圈選頭痛的年輕人全身 */
+        #area-5 { 
+            top: 25%; 
+            left: 47%; 
+            width: 17%; 
+            height: 48%; 
+            border-radius: 20px; 
+        } 
+        #area-7 { 
+            top: 48%; 
+            left: 75%; 
+            width: 23%; 
+            height: 47%; 
+            border-radius: 20px; 
+        } 
+
+        /* 跳轉到文章頁後，背景鋪滿整個視窗與整個頁面，不留下白色空行 */
+        html,
+        body {
+            min-height: 100%;
+        }
+        body.article-mode {
+            background:
+                radial-gradient(circle at 82% 18%, var(--accent-soft), transparent 30%),
+                linear-gradient(90deg, transparent, rgba(0,0,0,0.015)),
+                #fbfbf8;
+            background-attachment: fixed;
+        }
+        body.article-mode #content-section {
+            width: 100%;
+            max-width: none;
+            min-height: 100vh;
+            min-height: 100dvh;
+            margin: 0;
+            box-sizing: border-box;
+            padding: 84px max(20px, calc((100vw - 880px) / 2)) 60px;
+            background:
+                radial-gradient(circle at 82% 18%, var(--accent-soft), transparent 30%),
+                linear-gradient(90deg, transparent, rgba(0,0,0,0.015)),
+                #fbfbf8;
+        }
+        body.article-mode #content-section::before {
+            display: none;
+        }
+
+        /* 注音版的章節英文標籤維持與一般版相同的細緻無襯線字體 */
+        body.zh-bpmf .category-label {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-weight: 400;
+            font-size: 1.1rem;
+            letter-spacing: 0.3em;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 900px) {
+            #interactive-section h2 {
+                white-space: normal;
+                font-size: clamp(1.45rem, 6vw, 2.7rem);
+            }
+        }
+        @media (max-width: 767px) {
+            #home-section h1.cover-title {
+                font-size: clamp(2.1rem, 10vw, 3.2rem);
+                line-height: 1.25;
+            }
+            body.zh-bpmf #home-section h1.cover-title {
+                line-height: 1.72;
+            }
+        }
+
+
+        /* ===== 文章照片與影片：文繞圖版型 ===== */
+        .article-media {
+            float: right;
+            width: min(42%, 360px);
+            margin: 0.4rem 0 1.05rem 1.6rem;
+            border-radius: 18px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.76);
+            border: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 0 18px 42px rgba(0,0,0,0.10);
+            transform: translateZ(0);
+        }
+        .article-media.media-left {
+            float: left;
+            margin: 0.4rem 1.6rem 1.05rem 0;
+        }
+        .article-media.media-video {
+            width: min(46%, 390px);
+        }
+        .article-media.media-wide {
+            float: none;
+            clear: both;
+            width: min(100%, 760px);
+            margin: 2rem auto;
+        }
+        .article-media img,
+        .article-media video {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: #111;
+            object-fit: cover;
+        }
+        .article-media img {
+            filter: grayscale(8%) contrast(1.03) brightness(0.98);
+            transition: filter 0.45s ease, transform 0.45s ease;
+        }
+        .article-media:hover img,
+        .article-media:focus-within img {
+            filter: grayscale(0%) contrast(1.02) brightness(1);
+            transform: scale(1.015);
+        }
+        .article-media figcaption {
+            margin: 0;
+            padding: 10px 13px 11px;
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 0.78rem;
+            line-height: 1.55;
+            letter-spacing: 0.03em;
+            color: #666;
+            background: linear-gradient(90deg, rgba(255,255,255,0.92), var(--accent-soft));
+            border-top: 1px solid rgba(0,0,0,0.06);
+        }
+        #article-body::after {
+            content: "";
+            display: block;
+            clear: both;
+        }
+        body.zh-bpmf .article-media figcaption {
+            font-family: 'Noto Sans TC', sans-serif;
+            line-height: 1.65;
+        }
+        @media (max-width: 767px) {
+            .article-media,
+            .article-media.media-left,
+            .article-media.media-video,
+            .article-media.media-wide {
+                float: none;
+                clear: both;
+                width: 100%;
+                margin: 1.35rem 0 1.65rem;
+                border-radius: 16px;
+            }
+        }
+
+
+        /* ===== 右下角浮動：魚塭 AI 小助手 ===== */
+        .fish-ai-widget {
+            position: fixed;
+            right: 22px;
+            bottom: 22px;
+            z-index: 180;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .fish-ai-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(255,255,255,0.45);
+            border-radius: 999px;
+            padding: 12px 17px 12px 14px;
+            background: rgba(17,17,17,0.88);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.96rem;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            box-shadow: 0 18px 42px rgba(0,0,0,0.22);
+            backdrop-filter: blur(12px);
+            transition: transform 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+        }
+        .fish-ai-toggle:hover,
+        .fish-ai-toggle:focus-visible {
+            transform: translateY(-2px);
+            background: var(--accent, #111);
+            box-shadow: 0 22px 54px rgba(0,0,0,0.28);
+            outline: 3px dashed #ffeb3b;
+            outline-offset: 3px;
+        }
+        .fish-ai-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.34);
+            font-size: 1.08rem;
+        }
+        .fish-ai-panel {
+            position: absolute;
+            right: 0;
+            bottom: 64px;
+            width: min(92vw, 380px);
+            max-height: min(72vh, 620px);
+            display: none;
+            grid-template-rows: auto 1fr auto;
+            overflow: hidden;
+            border-radius: 24px;
+            background: rgba(251,251,248,0.96);
+            border: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 0 28px 80px rgba(0,0,0,0.28);
+            backdrop-filter: blur(18px);
+        }
+        .fish-ai-widget.is-open .fish-ai-panel {
+            display: grid;
+            animation: fish-ai-rise 0.28s ease both;
+        }
+        @keyframes fish-ai-rise {
+            from { opacity: 0; transform: translateY(12px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .fish-ai-header {
+            padding: 16px 18px 14px;
+            background:
+                radial-gradient(circle at 16% 20%, var(--accent-soft, rgba(111,143,159,0.18)), transparent 46%),
+                linear-gradient(180deg, rgba(255,255,255,0.84), rgba(255,255,255,0.62));
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+        .fish-ai-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .fish-ai-title {
+            font-family: 'Noto Serif TC', serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: 0.05em;
+            color: #111;
+        }
+        .fish-ai-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.08);
+            background: rgba(255,255,255,0.72);
+            color: #222;
+            cursor: pointer;
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+        .fish-ai-close:hover,
+        .fish-ai-close:focus-visible {
+            outline: 2px dashed var(--accent, #111);
+            outline-offset: 3px;
+        }
+        .fish-ai-subtitle {
+            margin: 7px 0 0;
+            color: #666;
+            font-size: 0.82rem;
+            line-height: 1.55;
+        }
+        .fish-ai-messages {
+            min-height: 220px;
+            overflow-y: auto;
+            padding: 16px;
+            scroll-behavior: smooth;
+        }
+        .fish-ai-message {
+            max-width: 86%;
+            margin-bottom: 12px;
+            padding: 11px 13px;
+            border-radius: 16px;
+            font-size: 0.93rem;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .fish-ai-message.bot {
+            color: #222;
+            background: #fff;
+            border: 1px solid rgba(0,0,0,0.07);
+            border-top-left-radius: 5px;
+            box-shadow: 0 10px 22px rgba(0,0,0,0.06);
+        }
+        .fish-ai-message.user {
+            margin-left: auto;
+            color: #fff;
+            background: var(--accent, #111);
+            border-top-right-radius: 5px;
+            box-shadow: 0 10px 22px rgba(0,0,0,0.10);
+        }
+        .fish-ai-quick {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            padding: 0 16px 12px;
+        }
+        .fish-ai-chip {
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 999px;
+            background: rgba(255,255,255,0.76);
+            color: #333;
+            padding: 6px 10px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+        .fish-ai-chip:hover,
+        .fish-ai-chip:focus-visible {
+            transform: translateY(-1px);
+            background: #fff;
+            outline: 2px dashed var(--accent, #111);
+            outline-offset: 2px;
+        }
+        .fish-ai-form {
+            display: flex;
+            gap: 8px;
+            padding: 13px;
+            border-top: 1px solid rgba(0,0,0,0.06);
+            background: rgba(255,255,255,0.74);
+        }
+        .fish-ai-input {
+            flex: 1;
+            min-width: 0;
+            border: 1px solid rgba(0,0,0,0.12);
+            border-radius: 999px;
+            padding: 11px 13px;
+            font-size: 0.95rem;
+            font-family: 'Noto Sans TC', sans-serif;
+            background: #fff;
+            color: #111;
+        }
+        .fish-ai-input:focus {
+            outline: 2px solid var(--accent-line, rgba(0,0,0,0.32));
+            outline-offset: 2px;
+        }
+        .fish-ai-send {
+            flex: 0 0 auto;
+            border: none;
+            border-radius: 999px;
+            padding: 0 14px;
+            background: #111;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .fish-ai-send:hover,
+        .fish-ai-send:focus-visible {
+            background: var(--accent, #111);
+            outline: 2px dashed #ffeb3b;
+            outline-offset: 3px;
+        }
+        body.zh-bpmf .fish-ai-widget {
+            font-family: 'GenYoGothic-Zhuyin', 'Noto Sans TC', sans-serif;
+        }
+        body.zh-bpmf .fish-ai-title {
+            font-family: 'GenYoMin-Zhuyin', 'Noto Serif TC', serif;
+        }
+        @media (max-width: 767px) {
+            .fish-ai-widget {
+                right: 14px;
+                bottom: 74px;
+            }
+            .fish-ai-toggle {
+                padding: 10px 13px 10px 11px;
+                font-size: 0.86rem;
+            }
+            .fish-ai-icon {
+                width: 28px;
+                height: 28px;
+            }
+            .fish-ai-panel {
+                bottom: 58px;
+                width: calc(100vw - 28px);
+                max-height: 68vh;
+                border-radius: 20px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="reading-progress" aria-hidden="true"></div>
+
+    <button id="lang-toggle-btn" onclick="toggleZhuyin()">切換為注音版</button>
+
+    <section id="home-section" class="fade-section">
+        <h1 class="serif-font cover-title" data-title-lines="我們的漁塭|發生了什麼事">
+            <span class="title-line">我們的漁塭</span>
+            <span class="title-line">發生了什麼事</span>
+        </h1>
+        <div class="scroll-hint">向下滾動探索 ↓</div>
+
+        <div class="cover-motion" aria-hidden="true">
+            <span class="pump-water"></span>
+            <span class="pond-ripple r1"></span>
+            <span class="pond-ripple r2"></span>
+            <span class="pond-ripple r3"></span>
+        </div>
+    </section>
+
+    <section id="interactive-section" class="fade-section">
+        <h2 class="serif-font">點擊畫面中你在意的地方，看看發生了什麼事！</h2>
+        <div class="image-container">
+            <img src="bg.png" 
+                 onerror="this.onerror=null;this.src='assets/media/bottom-mud.png'" 
+                 alt="漁塭現況示意圖">
+            
+            <div class="hotspot" id="area-1" data-label="01 水質" onclick="showContent(1)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showContent(1);}" tabindex="0" role="button" aria-label="神秘黑泥" title="神秘黑泥"><span class="hotspot-marker">01</span></div>
+            <div class="hotspot" id="area-2" data-label="02 生態" onclick="showContent(2)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showContent(2);}" tabindex="0" role="button" aria-label="動物大亂鬥" title="動物大亂鬥"><span class="hotspot-marker">02</span></div>
+            <div class="hotspot" id="area-3" data-label="03 氣候" onclick="showContent(3)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showContent(3);}" tabindex="0" role="button" aria-label="天氣大暴走" title="天氣大暴走"><span class="hotspot-marker">03</span></div>
+            <div class="hotspot" id="area-4" data-label="04 水資源" onclick="showContent(4)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showContent(4);}" tabindex="0" role="button" aria-label="太空濾水魔法" title="太空濾水魔法"><span class="hotspot-marker">04</span></div>
+            <div class="hotspot" id="area-5" data-label="05 社會" onclick="showContent(5)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showContent(5);}" tabindex="0" role="button" aria-label="05 社會：白髮漁民" title="05 社會：白髮漁民"><span class="hotspot-marker">05</span></div>
+            <div class="hotspot" id="area-6" data-label="06 能源" onclick="showContent(6)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showContent(6);}" tabindex="0" role="button" aria-label="發電大傘" title="發電大傘"><span class="hotspot-marker">06</span></div>
+            <div class="hotspot" id="area-7" data-label="07 科技" onclick="showContent(7)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showContent(7);}" tabindex="0" role="button" aria-label="07 科技：頭痛的年輕人" title="07 科技：頭痛的年輕人"><span class="hotspot-marker">07</span></div>
+        </div>
+
+        <div class="topic-guide" aria-label="七個分類快速導覽">
+            <button class="topic-chip chip-1" onclick="showContent(1)"><span></span>水質</button>
+            <button class="topic-chip chip-2" onclick="showContent(2)"><span></span>生態</button>
+            <button class="topic-chip chip-3" onclick="showContent(3)"><span></span>氣候</button>
+            <button class="topic-chip chip-4" onclick="showContent(4)"><span></span>水資源</button>
+            <button class="topic-chip chip-5" onclick="showContent(5)"><span></span>社會</button>
+            <button class="topic-chip chip-6" onclick="showContent(6)"><span></span>能源</button>
+            <button class="topic-chip chip-7" onclick="showContent(7)"><span></span>科技</button>
+        </div>
+    </section>
+
+    <section id="content-section" class="fade-section">
+        <div id="article-category" class="category-label"></div>
+        <h2 id="article-title" class="serif-font">標題</h2>
+        <div id="article-body">
+            </div>
+        <a class="back-btn" onclick="goBack()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goBack();}" tabindex="0" role="button">返回探索圖片</a>
+    </section>
+
+
+    <div class="fish-ai-widget" id="fish-ai-widget" aria-live="polite">
+        <section class="fish-ai-panel" id="fish-ai-panel" aria-label="魚塭 AI 小助手對話框">
+            <header class="fish-ai-header">
+                <div class="fish-ai-title-row">
+                    <div class="fish-ai-title">魚塭 AI 小助手</div>
+                    <button class="fish-ai-close" type="button" onclick="toggleFishAssistant(false)" aria-label="關閉魚塭 AI 小助手">×</button>
+                </div>
+                <p class="fish-ai-subtitle">可以問我文章重點、請我用更簡單的話說明，或請我依目前章節出題。</p>
+            </header>
+            <div class="fish-ai-messages" id="fish-ai-messages"></div>
+            <div class="fish-ai-quick" aria-label="快速提問">
+                <button class="fish-ai-chip" type="button" data-question="這章重點是什麼？">這章重點</button>
+                <button class="fish-ai-chip" type="button" data-question="幫我出3題">幫我出3題</button>
+                <button class="fish-ai-chip" type="button" data-question="優養化是什麼？">優養化</button>
+                <button class="fish-ai-chip" type="button" data-question="用更簡單的話說">更簡單說明</button>
+            </div>
+            <form class="fish-ai-form" id="fish-ai-form">
+                <input class="fish-ai-input" id="fish-ai-input" type="text" autocomplete="off" placeholder="輸入你的問題……" aria-label="輸入問題">
+                <button class="fish-ai-send" type="submit">送出</button>
+            </form>
+        </section>
+        <button class="fish-ai-toggle" id="fish-ai-toggle" type="button" onclick="toggleFishAssistant()" aria-controls="fish-ai-panel" aria-expanded="false">
+            <span class="fish-ai-icon" aria-hidden="true">🐟</span>
+            <span>魚塭 AI 小助手</span>
+        </button>
+    </div>
+
+
+    <script>
+        // 注音切換狀態
+        let isBpmfMode = false;
+        let currentArticleId = null;
+
+
+        const topicThemeClasses = ['topic-1','topic-2','topic-3','topic-4','topic-5','topic-6','topic-7'];
+        const pullQuotes = {
+            1: '原本讓人頭痛的「廢棄物」，也可能變成能保護環境的資源。',
+            2: '讓魚蝦交朋友聽起來很美好，但自然也會帶來漁民最真實的損失。',
+            3: '面對天氣怪獸，魚塭需要的不只是勇氣，還有付得起的防護。',
+            4: '一滴水用十次，是科技的魔法，也是漁村不再下沉的希望。',
+            5: '老漁民的經驗不是落伍，而是寫在風、水色與泥土裡的知識。',
+            6: '一邊種電、一邊養魚，真正困難的是讓陽光、魚和人都留下來。',
+            7: '機器人保母要真的走進魚塭，必須先學會不怕水、不怕鹽，也不嚇到阿公。'
+        };
+
+        function setActiveTopic(id) {
+            topicThemeClasses.forEach(cls => document.body.classList.remove(cls));
+            if (id) document.body.classList.add('topic-' + id);
+        }
+
+        function enhanceArticle(id) {
+            setActiveTopic(id);
+            const body = document.getElementById('article-body');
+            if (!body || !pullQuotes[id]) return;
+            const quote = document.createElement('blockquote');
+            quote.className = 'pull-quote';
+            quote.innerHTML = `${pullQuotes[id]}<cite>核心提問</cite>`;
+            const firstH3 = body.querySelector('h3');
+            if (firstH3) firstH3.insertAdjacentElement('beforebegin', quote);
+        }
+
+        function initTitleReveal() {
+            const title = document.querySelector('#home-section h1');
+            if (!title || title.dataset.revealed === 'true') return;
+            const lines = (title.dataset.titleLines || title.textContent.trim()).split('|');
+            title.innerHTML = '';
+            let charIndex = 0;
+            lines.forEach((lineText) => {
+                const line = document.createElement('span');
+                line.className = 'title-line';
+                Array.from(lineText).forEach((char) => {
+                    const span = document.createElement('span');
+                    span.className = 'title-char';
+                    span.style.setProperty('--i', charIndex);
+                    span.textContent = char;
+                    line.appendChild(span);
+                    charIndex += 1;
+                });
+                title.appendChild(line);
+            });
+            title.dataset.revealed = 'true';
+        }
+
+        function updateReadingProgress() {
+            const bar = document.getElementById('reading-progress');
+            if (!bar) return;
+            const doc = document.documentElement;
+            const max = Math.max(1, doc.scrollHeight - window.innerHeight);
+            const percent = Math.min(100, Math.max(0, (window.scrollY / max) * 100));
+            bar.style.width = percent + '%';
+        }
+
+
+        function toggleZhuyin() {
+            const body = document.body;
+            const btn = document.getElementById('lang-toggle-btn');
+            
+            isBpmfMode = !isBpmfMode;
+            
+            if (isBpmfMode) {
+                body.classList.add('zh-bpmf');
+                btn.textContent = '切換為一般版';
+            } else {
+                body.classList.remove('zh-bpmf');
+                btn.textContent = '切換為注音版';
+            }
+        }
+
+        // 儲存 PDF 各章節的標題與前言內容
+        const articles = {
+            1: {
+                category: "01 / WATER",
+                title: "魚塭底下的神祕黑泥：是毒藥還是黃金？",
+                body: `<p>你有沒有經過魚塭時，聞過一股像「臭雞蛋」的刺鼻味道？或是看過池水變得像綠豆湯一樣，整片都綠油油的？其實這都是漁塭裡面的「隱形怪獸」搞得鬼。</p>
+                       <h3>魚池裡的「隱形怪獸」是怎麼來的？</h3>
+                       <p>為了解決大家愛吃海鮮的需求，現在的養殖場常常是「小小的池子，住著滿滿的魚蝦」。你可以想像一下，如果有一百個小朋友被擠在一間小教室裡，每天在裡面吃飯、上廁所，卻從不打掃，會發生什麼事？</p>
+                       <figure class="article-media media-right">
+                           <img src="assets/media/bottom-mud.png" alt="魚塭底泥與泥濘水面" loading="lazy" decoding="async">
+                           <figcaption>魚塭底部累積的黑泥，對應飼料、排泄物與有機物沉積後造成的水質壓力。</figcaption>
+                       </figure>
+                       <p>沒錯，會變得又髒又臭。那漁塭也是一樣的概念。<strong>魚蝦吃不完的飼料、便便，還有不小心死掉的小水生動物</strong>，假如沒有清理掉的話，最後都會慢慢<strong>沉到池子最底下</strong>，<strong>變成</strong>一層又厚又臭的<strong>「底泥」</strong>。</p>
+                       <p>當這些<strong>底泥</strong>在水底悶著、<strong>沒有氧氣</strong>的時候，<strong>細菌就會跑來分解它們，並且偷偷釋放出有毒的化學氣體</strong>（例如：氨氮、硫化氫）。這就是臭味的來源，也是讓水變髒、讓魚蝦生病的「隱形怪獸」！</p>
+                       <h3>把怪獸變成「綠金」的神奇魔法</h3>
+                       <p>以前的漁夫遇到水變髒，解決方法很簡單，就是把髒水通通抽掉，直接排進附近的小河裡。但是，這些充滿排泄物（髒東西）的髒水，會讓河川裡的藻類瘋狂生長，把水裡的氧氣都用光光。這在科學上叫做<strong>「優養化」，會害死河裡的其他小動物。</strong></p>
+                       <figure class="article-media media-left">
+                           <img src="assets/media/eutrophication.jpg" alt="河川優養化造成水體變綠" loading="lazy" decoding="async">
+                           <figcaption>優養化讓藻類大量繁殖，水體變綠，也可能讓水中的氧氣快速下降。</figcaption>
+                       </figure>
+                       <p>為了解決這個環境危機，科學家想到了一個超棒的魔法，叫做<strong>「循環經濟」</strong>！</p>
+                       <p>既然底泥和髒水裡面有很多營養，我們為什麼不把它們變成有用的東西呢？科學家發明了特殊的過濾機器，把髒水裡的固體底泥分離出來，經過發酵處理後，竟然變成了農夫種菜最愛用的超級有機肥料！</p>
+                       <p>這樣一來，不但魚塭的水變乾淨了，原本讓人頭痛的<strong>「廢棄物」變成了可以賣錢的「資源」</strong>，達成保護環境的目的。</p>
+                       <h3>保護環境與賺錢的終極考驗</h3>
+                       <p>哇！這個「循環經濟」魔法聽起來太完美了，只要買機器就能解決所有問題。但是，為什麼不是每一個魚塭都有裝這些機器呢？</p>
+                       <p>想像一下，如果你想買一台超級酷炫的玩具，但它要花光你十年的零用錢，而且超級耗電，還大到會佔掉你房間一半的空間，你會毫不猶豫地買下去嗎？</p>
+                       <p>這就是基層漁民現在面臨的真實煩惱：</p>
+                       <ol>
+                           <li>太昂貴： 這些環保機器動輒<strong>需要幾十萬甚至幾百萬元</strong>，賣魚<strong>賺的錢根本不夠付</strong>。</li>
+                           <li>太耗電： 機器需要 <strong>24 小時開著才能淨化水質，電費非常驚人</strong>。</li>
+                           <li>佔空間： 裝了巨大的過濾池，<strong>養魚的空間</strong>就<strong>變小</strong>了，能賣的魚就更少。</li>
+                       </ol>
+                       <p>保護環境真的很重要，但漁民也需要賺錢養家。如果沒有政府長期的幫忙與經費補助，只逼著小農戶自己吸收這些龐大的費用，他們可能就只能破產不養魚了。</p>
+                       <p>科學發明了很棒的環保機器，但在真實世界裡，我們還需要思考「錢」與「人」的問題。下次當你吃著美味的魚蝦時，不妨也想一想，我們可以怎麼做，才能同時保護環境，又照顧到辛苦養魚的漁民呢？</p>`
+            },
+            2: {
+                category: "02 / ECOLOGY",
+                title: "魚池裡的動物大亂鬥：該讓魚蝦交朋友，還是當獨行俠？",
+                body: `<p>想像一下你的班級，如果全班每一個人都只會畫畫，沒有人會算數學、沒有人會跑步，也沒有人會打掃，這個班級能順利運作嗎？</p>
+                       <p>大自然的池塘也是一樣的！在<strong>很久以前，臺灣的魚塭</strong>裡非常熱鬧，<strong>住著各式各樣的魚、蝦子、螺類，還有綠綠的藻類</strong>，大家像一個大家庭一樣生活在一起。但在這幾十年來，魚池裡卻悄悄發生了巨大的變化。</p>
+                       <figure class="article-media media-left">
+                           <img src="assets/media/historical-fishpond.jpg" alt="日治時期魚塭老照片" loading="lazy" decoding="async">
+                           <figcaption>早期魚塭留下的影像，放在「過去的魚塭生態」段落，讓時間感自然接上文章。</figcaption>
+                       </figure>
+                       <h3>獨行俠的危機：當池子裡只剩下一種魚</h3>
+                       <p><strong>為了讓魚蝦長得又快又肥</strong>，好賣到市場上賺錢，許多漁夫阿伯開始改變作法。他們把魚塭裡的其他生物通通趕走，<strong>整個大池子裡只養一種動物</strong>。像是「只養一種魚」，或是「只養一種蝦」。而且，他們因為害怕其他小蟲或是藻類來搶食物和氧氣，他們甚至會<strong>撒下化學藥劑來清除</strong>這些「不速之客」。</p>
+                       <p>一開始，這種「獨行俠」的方法真的賺到了錢。但是，問題很快就來了！</p>
+                       <p>因為<strong>池子裡沒有其他生物幫忙吃掉髒東西，水很容易變壞。魚蝦生病了</strong>，漁夫只好倒進更多的藥水。久而久之，池子裡居然出現了不怕藥水的「超級細菌」，讓整池的魚蝦一次全部翻肚死掉。而且，大家也會擔心買到的魚身上是不是殘留了太多藥物，變得不敢吃魚了。</p>
+                       <h3>大自然的神奇團隊：生物多樣性的魔法</h3>
+                       <p>為了解決這個危機，科學家和年輕的漁夫們提出了一個新點子：我們把魚蝦的朋友們找回來吧！ 這在科學上叫做<strong>恢復「生物多樣性</strong>」。</p>
+                       <p>其實，大自然本身就是一個超級完美的團隊。如果在<strong>池子裡放進不同種類的生物</strong>，牠們就會<strong>發揮各自的超能力</strong>：</p>
+                       <ul>
+                           <li>除「藻」機： 吃藻類的<strong>魚</strong>可以幫忙<strong>吃掉過多的藻類</strong>，不讓水變混濁。</li>
+                           <li>濾水器： 躲在泥土裡的<strong>文蛤和牡蠣</strong>，會<strong>把水裡的碎屑吸進去吃掉</strong>，讓水變得更乾淨。</li>
+                       </ul>
+                       <p>當大家分工合作，池水就會自動保持乾淨，漁夫再也不需要倒進可怕的化學藥劑了！這種健康環境養出來的魚，肉質反而更好吃。</p>
+                       <figure class="article-media media-right">
+                           <img src="assets/media/polyculture-clam-harvest.jpg" alt="混養魚塭中捕撈蛤蜊" loading="lazy" decoding="async">
+                           <figcaption>混養魚塭裡，文蛤等生物能扮演濾水與資源利用的角色。</figcaption>
+                       </figure>
+                       <p>在臺南的七股，還有漁夫阿伯特別在冬天把水抽淺，故意留下一些小魚，請來過冬的「黑面琵鷺」飽餐一頓。這種愛護鳥類又保護環境的魚蝦，會獲得政府頒發的「環保標章」，在市場上可以賣到更好的價錢呢！</p>
+                       <h3>大自然的貪吃鬼與漁夫的眼淚</h3>
+                       <p>哇！讓不同的動物住在一起，聽起來像童話故事一樣美好。但為什麼還是有很多傳統的漁夫阿伯，拼了命也要反對呢？</p>
+                       <p>因為在真實的自然界裡，交朋友是需要付出龐大代價的：</p>
+                       <ol>
+                           <li>失控的氧氣大戰： 如果<strong>天氣突然大變</strong>，池子裡的<strong>藻類或其他小生物</strong>可能會<strong>突然暴增</strong>，把水裡的<strong>氧氣吸光光</strong>，害得原本要拿去賣的<strong>魚缺氧悶死</strong>。</li>
+                           <li>天上掉下來的貪吃鬼： 這是漁夫最害怕的噩夢！當魚塭變成豐富的生態樂園，就會<strong>吸引成群的白鷺鷥、鸕鶿等大鳥飛來吃</strong>「免費的自助餐」。幾天之內，價值好幾萬元的<strong>魚苗就會被鳥吃得一乾二淨</strong>。</li>
+                       </ol>
+                       <p>對於很多沒有能力自己推銷、只能把魚賣給傳統市場的老漁夫來說，被鳥吃掉的魚就是直接賠錢。市場的老闆也不會因為你的魚塭有「保護生態」，就多付一點錢收購。<strong>配合環保，反而讓這些辛苦的阿伯血本無歸。</strong></p>
+                       <p>要保護生態環境，又要確保漁夫阿伯不會餓肚子，這真是一個超級難題！如果有一天你成為了環保局長，你會怎麼幫助這些漁夫呢？</p>`
+            },
+            3: {
+                category: "03 / CLIMATE",
+                title: "天氣大暴走！該幫魚蝦蓋一座「防護罩城堡」嗎？",
+                body: `<p>你有沒有在冬天冷到直發抖，或是看過颱風天狂風暴雨的可怕景象？當我們躲在溫暖安全的家裡時，你想過那些住在戶外魚塭裡的魚蝦們，該怎麼辦嗎？</p>
+                       <p>在臺灣，養魚一直是一個「靠天吃飯」的辛苦工作。現在全球氣候變遷，天氣就像發脾氣的怪獸一樣，常常出現極端的可怕變化，這讓魚池裡的魚蝦們面臨了巨大的生存危機！</p>
+                       <h3>魚池裡的「冰風暴」與「大水災」</h3>
+                       <p>在 2016 年的冬天，臺灣發生了一場超可怕的「霸王級寒流」。當時南部的<strong>氣溫突然掉到只剩個位數</strong>，那些原本<strong>習慣溫暖天氣的虱目魚和石斑魚</strong>，就像沒穿外套一樣，在冰冷的水裡<strong>被活活凍死</strong>，水面上浮滿了魚的屍體，讓漁夫阿伯們看了好心痛。</p>
+                       <figure class="article-media media-right media-video">
+                           <video src="assets/media/cold-wave-fish-death.mp4" controls preload="metadata" playsinline></video>
+                           <figcaption>寒流造成魚塭漁獲死亡的新聞片段，對應「冰風暴」帶來的真實衝擊。</figcaption>
+                       </figure>
+                       <p>除了寒流，夏天狂暴的颱風也是大威脅。現在的颱風常常帶著「超大豪雨」，短短幾個小時內，雨水就會讓<strong>魚塭的水滿出來</strong>。水壩一破，漁夫辛辛苦苦養大的<strong>魚</strong>，瞬間就<strong>跟著大水游走了</strong>！</p>
+                       <h3>幫魚兒穿外套：科學家的「防護罩魔法」</h3>
+                       <p>天氣越來越可怕，科學家告訴漁夫們：「我們不能再靠運氣了，必須幫魚蝦升級防護罩！」他們想出了兩個超酷的科學魔法：</p>
+                       <ul>
+                           <li>魔法一：蓋一條「深水禦寒毯」原本的魚池大約只有一個大人那麼深（1.5 公尺）。<strong>科學家建議把池子挖到兩倍深</strong>（3公尺）！因為<strong>越深的水，溫度的變化就越慢</strong>。當寒流來的時候，深層的水溫就像一條厚厚的保暖毯，可以保護魚蝦不被凍傷；大雨來的時候，也比較不會滿出來。</li>
+                           <li>魔法二：打造超強的「室內水城堡」更厲害的方法，是直接<strong>幫魚池蓋一個有屋頂的溫室</strong>，甚至是完全封閉的室內工廠！裡面不但能擋風遮雨，還有冷暖氣可以控制水溫。住在城堡裡的魚，一年四季都能平平安安地長大，就算外面刮大風下大雨也不怕。</li>
+                       <figure class="article-media media-left">
+                           <img src="assets/media/greenhouse-fishpond.jpg" alt="有遮棚的溫室魚塭" loading="lazy" decoding="async">
+                           <figcaption>溫室魚塭像替魚蝦加上一層防護罩，能呼應文章中的「室內水城堡」。</figcaption>
+                       </figure>
+                       </ul>
+                       <h3>蓋城堡太貴了！漁夫阿伯的艱難選擇</h3>
+                       <p>哇！有了「水城堡」，魚蝦就安全了，為什麼大家不趕快蓋呢？</p>
+                       <p>因為，在現實世界裡，蓋城堡的代價實在太驚人了！首先，<strong>要蓋一間防颱風的溫室，需要花費好幾百萬甚至上千萬元</strong>，這些錢都可以去買一台汽車了，甚至可以直接買一輛保時捷。而且，室內城堡需要 24 小時開著機器來抽水和吹暖氣，每個月的電費會讓人嚇到下巴掉下來。</p>
+                       <p>很多傳統的漁夫阿伯精打細算後，搖搖頭說：「超級寒流或大颱風，可能好幾年才來一次。如果我現在去銀行借一大筆錢蓋溫室，我可能連飯都吃不飽了。」</p>
+                       <p>對他們來說，與其花大錢蓋城堡，不如維持現在的樣子。如果真的不幸遇到天災，至少還可以向政府申請「天然災害補助」，拿一點救命錢來彌補損失。</p>
+                       <p>面對越來越瘋狂的天氣怪獸，如果你是魚塭的設計師，你會選擇花大錢蓋一座安全的室內城堡？還是留在戶外，想出其他更省錢的防禦妙招呢？</p>`
+            },
+            4: {
+                category: "04 / RESOURCES",
+                title: "魚塭口渴了！拯救沉沒村莊的「太空濾水魔法」",
+                body: `<p>你每天口渴的時候，只要打開水龍頭就有乾淨的水可以喝。但是，你知道養一池子的魚蝦，需要喝掉多麼驚人的水量嗎？</p>
+                       <p>魚蝦每天在水裡吃飯、大便，為了<strong>不讓水變得太髒、太毒</strong>，漁夫阿伯必須<strong>經常幫魚塭「換水」</strong>。可是，臺灣南部很多養魚的地方，附近根本沒有足夠的河水或水庫，那該怎麼辦呢？</p>
+                       <h3>消失的地下水與沉沒的村莊</h3>
+                       <p>在以前，漁夫們想到了一個方法：<strong>在地上打一口深深的井</strong>，插進一根「超級巨大的吸管」，<strong>把藏在泥土深處的「地下水」猛吸上來用</strong>。</p>
+                       <figure class="article-media media-right">
+                           <img src="assets/media/groundwater-pump.jpg" alt="地下水抽水管將水排入渠道" loading="lazy" decoding="async">
+                           <figcaption>抽取地下水的管線畫面，放在「超級巨大吸管」的比喻旁邊最直覺。</figcaption>
+                       </figure>
+                       <p>一開始，這個方法看起來棒極了，地下水又多又乾淨。但是，大家幾十年來沒日沒夜地狂吸，<strong>地下水漸漸被抽乾了</strong>。<strong>失去了水的支撐</strong>，原本堅硬的土地就像洩了氣的皮球一樣，<strong>開始往下塌陷</strong>！這在科學上叫做<strong>「地層下陷」</strong>。</p>
+                       <figure class="article-media media-left">
+                           <img src="assets/media/land-subsidence.jpg" alt="地層下陷與水位變化的魚塭岸邊" loading="lazy" decoding="async">
+                           <figcaption>地層下陷與淹水風險，是長期超抽地下水後最具體的後果之一。</figcaption>
+                       </figure>
+                       <p>在臺灣沿海的一些小村莊，土地甚至下陷了超過兩公尺！現在只要一下大雨，或是海水漲潮，海水就會倒灌進村子裡，連房子都泡在水裡。為了拯救沉沒的村莊，政府只好嚴格禁止大家再抽地下水。加上現在常常遇到乾旱不下雨，傳統的魚塭面臨了「無水可用」的超大危機！</p>
+                       <h3>太空站的科技：一滴水用十次的魔法</h3>
+                       <p>沒有水，難道就不養魚了嗎？科學家想到了一個超酷的解方，靈感竟然來自「太空站」！</p>
+                       <p>太空人在太空中沒有水龍頭，他們洗澡、尿尿的水，都會經過特殊的機器過濾後，變成乾淨的水重新喝下肚。科學家把這種技術搬到了魚塭，發明了<strong>「循環水養殖系統」</strong>。</p>
+                       <figure class="article-media media-right">
+                           <img src="assets/media/recirculating-aquaculture.jpg" alt="室內循環水養殖池" loading="lazy" decoding="async">
+                           <figcaption>循環水養殖系統把水反覆處理後再使用，對應「一滴水用十次」的概念。</figcaption>
+                       </figure>
+                       <p>這套神奇的系統就像一個超級濾水器，有三個厲害的關卡：</p>
+                       <ol>
+                           <li>物理濾網： 先把水裡<strong>大塊的魚大便和沒吃完的飼料攔截下來</strong>。</li>
+                           <li>好細菌部隊： 派出肉眼看不見的「<strong>好細菌</strong>」，把它們當作清道夫，<strong>吃掉水裡有毒的化學物質</strong>。</li>
+                           <li>光波殺菌： 最後<strong>用超強的紫外線光照一照</strong>，把會讓魚蝦生病的<strong>壞細菌通通殺死</strong>。</li>
+                       </ol>
+                       <p>經過這三個關卡，原本又黑又臭的髒水，就會變成乾淨的好水，重新流回魚池裡！用這種魔法，<strong>魚塭可以省下 90% 的水量</strong>，再也不用偷抽地下水，而且魚蝦住在乾淨的水裡也更不容易生病了。</p>
+                       <h3>為什麼不用魔法？因為開太空船太難啦！</h3>
+                       <p>哇！這簡直是拯救地球的完美發明啊！那為什麼不是每一個魚塭都裝上這套「太空濾水器」呢？</p>
+                       <p>想像一下，如果你阿公原本只會騎腳踏車，你突然塞給他一艘太空船，叫他開上宇宙，他一定會崩潰吧！傳統漁夫現在就面臨這個超大困難：</p>
+                       <ol>
+                           <li>需要超級大腦： 要操作這套系統，漁夫不能只<strong>懂養魚</strong>，還要懂<strong>怎麼測量水質</strong>、怎麼<strong>照顧好細菌部隊</strong>，甚至要會<strong>修理複雜的馬達和電線</strong>。這對老漁夫來說簡直像看無字天書。</li>
+                           <li>恐怖的停電危機： 這套系統是靠電力維持生命的。所有的<strong>馬達必須 24 小時不停轉動</strong>，如果遇到颱風天突然<strong>停電</strong>，備用發電機又剛好壞掉，擠在小水池裡的魚蝦，會在短短一兩個小時內全部因為<strong>缺氧而死光光</strong>！</li>
+                           <li>價格貴到嚇人： 機器非常昂貴，目前只有養殖像鰻魚、高級石斑魚這種「賣得很貴」的<strong>大公司才買得起</strong>。如果只是一般平價的虱目魚或吳郭魚，<strong>賣魚的錢根本不夠付機器的錢</strong>。</li>
+                       </ol>
+                       <p>科技發明雖然解決了缺水的問題，卻也帶來了「<strong>太貴、太難、太耗電</strong>」的新挑戰。看來，要讓魚蝦有水喝、又要保護土地不下陷，還有好多難關等著我們去克服呢！</p>`
+            },
+            5: {
+                category: "05 / SOCIETY",
+                title: "漁村裡的「白髮超級英雄」：如果阿公阿嬤養不動魚了，該怎麼辦？",
+                body: `<p>如果讓你選一份未來的工作：一個是坐在有冷氣的辦公室裡，週休二日，每個月有固定的薪水；另一個是每天要在烈日下曬太陽、在寒流來時吹冷風，身上總是沾著魚腥味，而且只要颱風一來，賺的錢可能瞬間泡湯。你會選哪一個？</p>
+                       <p>相信大部分的人都會選擇去城市裡吹冷氣吧！這就是臺灣漁村現在面臨的最大危機。</p>
+                       <p>幾十年來，漁村裡的年輕人長大後，紛紛跑到大城市去上班。現在留在魚塭旁邊辛苦養魚的，幾乎都是滿頭白髮、平均年齡超過 60 歲的阿公阿嬤，有些甚至已經 80 歲了還在苦撐。當這些「白髮超級英雄」慢慢變老、體力衰退，再也搬不動沉重的飼料時，誰來接班養魚給我們吃呢？</p>
+                       <figure class="article-media media-left media-video">
+                           <video src="assets/media/aging-fishing-village.mp4" controls preload="metadata" playsinline></video>
+                           <figcaption>漁村高齡化的新聞片段，放在「白髮超級英雄」段落旁，讓社會問題更有畫面。</figcaption>
+                       </figure>
+                       <h3>危機變成轉機？打造「超級大魚廠」</h3>
+                       <p>看到漁村裡老人家越來越多，有一些經濟學家和科技大老闆反而覺得：「這或許是一個讓臺灣養魚技術『大升級』的好機會喔！」</p>
+                       <p>為什麼呢？因為以前的魚塭都是「一家一小塊」，阿公阿嬤賺的錢不多，根本買不起厲害的環保機器或高科技設備。</p>
+                       <p>專家們心想，當這些阿公阿嬤退休不養魚了，剛好可以把這些零零碎碎的小魚塭全部合併起來，交給有錢的大公司或厲害的青年科技團隊。他們可以把<strong>魚塭改造成超大型、有機器人幫忙、規格統一的「超級大魚廠」</strong>！就像把老舊的傳統雜貨店，改造成明亮又現代的大型超級市場一樣。這樣不但能<strong>養出更多魚，還能把臺灣的魚賣到全世界！</strong></p>
+                       <h3>消失的魔法書與變成「幽靈村」的危機</h3>
+                       <p>哇！把小魚塭變成高科技的超級大魚廠，聽起來很棒呀！但很多專門研究歷史和社會的學者，卻著急得直搖頭。他們說，事情絕對沒有這麼簡單！</p>
+                       <ol>
+                           <li>腦袋裡的「養魚魔法書」會消失： 養魚可不是只要有高科技機器就會成功的！每個地方的泥土、水質和風向都不一樣。<strong>老漁夫</strong>有一種神奇的「超能力」，他們<strong>只要聞一下風的味道、看一下水的顏色，就知道接下來該怎麼照顧魚。</strong>這種寫在他們腦袋裡的「隱形知識」，電腦根本學不會。如果沒有年輕人跟在阿公身邊慢慢學，等阿公過世了，這些珍貴的養魚魔法就會永遠失傳。</li>
+                           <li>漁村會變成沒有人的「幽靈村」： 如果魚塭都沒人接手，或者全部被少數幾家大公司包下來，會發生什麼可怕的連鎖反應呢？ 你想想看，<strong>沒有了小漁夫，村子裡賣魚飼料的老闆就會倒閉；幫忙做漁網的阿姨會失業；製冰廠和開大卡車送魚的司機也會沒飯吃</strong>。最後，整個村子的人都會搬走。當村子空了，那些熱鬧的廟會、咚咚鏘的陣頭表演，就再也沒有人來參加了。我們美麗的<strong>漁村文化</strong>，就會像恐龍一樣<strong>徹底滅絕</strong>。</li>
+                       </ol>
+                       <p>當阿公阿嬤漸漸老去，我們要怎麼把大公司的「現代科技」，和老漁夫的「養魚魔法」結合在一起？又要怎麼吸引年輕人願意回到故鄉，讓漁村重新熱鬧起來？這是所有大人和小朋友，都要一起關心的大問題喔！</p>`
+            },
+            6: {
+                category: "06 / ENERGY",
+                title: "魚塭頭頂上的「發電大傘」：一邊種電一邊養魚，真的可行嗎？",
+                body: `<p>為了保護地球、減少空氣污染，大家都在努力使用不會製造黑煙的「綠色能源」，比如太陽能。但是，臺灣的土地這麼小、人這麼多，哪來那麼大的空地可以放太陽能板呢？</p>
+                       <p>這時候，有人把腦筋動到了<strong>南部廣大的魚塭</strong>上：「魚池那裡<strong>太陽超大</strong>，如果我們在<strong>魚池上面蓋太陽能板</strong>，不就可以『<strong>一邊發電、一邊養魚</strong>』了嗎？」這個聽起來一舉兩得的好點子，叫做「<strong>漁電共生</strong>」。</p>
+                       <figure class="article-media media-right">
+                           <img src="assets/media/solar-revenue.jpeg" alt="水面上的太陽能板支架" loading="lazy" decoding="async">
+                           <figcaption>魚塭上方架設太陽能板，對應「一邊發電、一邊養魚」的基本概念。</figcaption>
+                       </figure>
+                       <p>為了保護魚兒，政府還特別規定：太陽能板不能把魚池全部蓋住，必須留下一大半的空間讓陽光照進來，而且養出來的魚不能變少太多，否則就不准賣電！</p>
+                       <h3>太陽能板變成魚兒的「超級保護傘」</h3>
+                       <p>對很多地主和支持這個計畫的人來說，這簡直是天上掉下來的禮物！</p>
+                       <ul>
+                           <li>超級防護罩： 夏天太陽太毒辣，水溫太高會把魚熱死；冬天寒流來，魚又會凍傷。水面上的太陽能板就像一把大傘，夏天幫魚兒<strong>遮陽</strong>，冬天幫忙<strong>擋住</strong>冰冷的<strong>狂風</strong>。</li>
+                           <li>安定的零用錢： 養魚常常要看天氣，有時候遇到天災，魚死光了就沒錢賺。現在只要讓發電公司在魚池上蓋<strong>太陽能板</strong>，魚塭的主人每年都能<strong>拿到一筆很穩定的「租金」</strong>，還可以拿這筆錢來把破舊的魚池翻新，升級成更厲害的養殖場。</li>
+                       </ul>
+                       <figure class="article-media media-left">
+                           <img src="assets/media/qigu-solar-fishery.jpg" alt="臺南七股大面積漁電共生場域空拍" loading="lazy" decoding="async">
+                           <figcaption>大面積漁電共生空拍圖，放在利益與爭議交界處，讓規模感更清楚。</figcaption>
+                       </figure>
+                       <h3>太陽能大傘下的「陰影」</h3>
+                       <p>哇！一邊賺電費、一邊養魚，這麼完美的點子，為什麼會在漁村裡引起超級大吵架，甚至讓環保團體抗議呢？原來，當大家發現「發電比養魚更好賺」的時候，事情就變調了：</p>
+                       <ul>
+                           <li>漁夫被迫搬家： 發電公司太有錢了，他們願意付給地主的租金，比原本租給漁夫養魚的錢多出好幾倍！很多地主看了很心動，就<strong>把土地租給發電公司，不租給真正會養魚的漁夫</strong>了。這害得許多認真養魚的阿伯和年輕人突然失業，沒有地方可以工作。</li>
+                           <li>水裡的綠藻餓肚子： 太陽能板雖然只遮住了一部分天空，但對池子裡的生態還是有很大的影響。水裡微小的「綠藻」需要曬太陽才能長大，<strong>陽光變少了</strong>，綠藻長不出來，那些靠吃綠藻長大的<strong>文蛤和魚蝦就會餓肚子，甚至生病死掉</strong>。</li>
+                           <li>假裝養魚，偷偷種電： <strong>政府規定必須「好好養魚」才能賣電</strong>。但有些壞心的公司根本不會照顧魚，他們只想要發電賺錢。於是，他們就在池子裡隨便丟一些生命力很強、但沒有人要吃的雜魚來「充數」，<strong>假裝自己有在養魚</strong>，其實根本違背了生產食物的本意。</li>
+                       </ul>
+                       <p>為了讓發電與養魚不再像仇人，科學家與工程師們正在嘗試各種「破關」的方法。</p>
+                       <p>例如，有人把密不透風的太陽能板，改造成像「百葉窗」一樣排得開開的，希望陽光能隨著時間均勻地灑進水池裡；也有人發明了「AI 水底攝影機」，專門用來抓出那些假裝養魚的壞公司。</p>
+                       <p>但是，這些方法真的是完美的嗎？你想想看，百葉窗式的設計，在颱風來的時候會不會像風帆一樣，特別容易被強風吹壞？而那些高科技的 AI 攝影機，原本就賺不到什麼錢的傳統漁夫阿伯，真的買得起、學得會嗎？</p>
+                       <p>在真實的科學世界裡，解決了一個麻煩，往往又會跑出另一個新的挑戰。這場「一邊種電、一邊養魚」的大實驗，到現在都還沒有標準答案！</p>
+                       <p>如果你是未來的魚塭設計工程師，你會怎麼改變太陽能板的排列方式，讓綠藻照得到太陽，又能發出足夠的電？你會怎麼設計規則，保護辛苦養魚的阿伯不被趕走？接下來，把課本闔上，換你們來幫臺灣的魚塭找出一條真正的「共生」之路吧！</p>`
+            },
+            7: {
+                category: "07 / TECHNOLOGY",
+                title: "漁塭裡的機器人保母：讓 AI 幫忙養魚好嗎？",
+                body: `<p>如果請你照顧一隻小狗，你可能會覺得很開心；但如果請你照顧幾萬隻、甚至幾十萬隻的魚蝦，而且要一天 24 小時都盯著牠們，你會不會覺得快崩潰了呢？</p>
+                       <p>養魚，一直以來都是一個超級辛苦的工作。傳統的漁夫阿伯必須像超人一樣，每天靠著<strong>「看水的顏色、聞水的味道」來猜魚蝦健不健康</strong>。最可怕的是，<strong>半夜</strong>是水裡氧氣最少的時候，漁夫阿伯常常<strong>要在黑漆漆、冷颼颼的半夜爬起床，跑到池子邊打開打水車</strong>，就怕魚蝦會缺氧死掉。</p>
+                       <p>因為實在太累了，村子裡的<strong>年輕人長大後都跑到大城市去工作</strong>，只<strong>剩下年紀越來越大的阿公阿嬤</strong>留在漁村裡。再這樣下去，以後會不會<strong>沒有人幫我們養魚了</strong>？</p>
+                       <h3>科技超能力：水底千里眼與聰明餵食器</h3>
+                       <p>為了解決這個大麻煩，科技專家們帶著厲害的「電腦」和「機器人」來到漁村，準備幫阿伯們來一場「科技大變身」！</p>
+                       <p>專家們把許多<strong>高科技的感測器放進水裡</strong>，就像在水底安裝了「千里眼」。現在，漁夫阿伯不用半夜起床吹冷風了，<strong>只要躺在床上打開手機 APP，就能看到水裡有多冷、氧氣夠不夠</strong>。如果水裡的<strong>氧氣突然變少，手機會「嗶嗶嗶」大叫</strong>，還能<strong>自動遙控打開打水車</strong>，是不是超級方便？</p>
+                       <figure class="article-media media-right">
+                           <img src="assets/media/smart-aquaculture.jpg" alt="研究人員在養殖池旁操作監測設備" loading="lazy" decoding="async">
+                           <figcaption>科技養殖場景，對應感測器、監控設備與智慧管理。</figcaption>
+                       </figure>
+                       <p>除了千里眼，還有超厲害的「<strong>AI 聰明餵食器</strong>」。以前阿伯撒飼料，常常不小心撒太多，魚吃不完沉到水底，就會把水弄髒。現在的 AI 攝影機就像一個厲害的保母，它會<strong>盯著魚群看</strong>：「嗯，大家游得很激動，<strong>肚子餓了</strong>，趕快<strong>放飼料</strong>！」、「喔？大家游得很慢，<strong>吃飽了</strong>，馬上<strong>停止餵食</strong>！」這樣不但省下了飼料錢，水也變乾淨了。</p>
+                       <p>看到養魚變得這麼有科技感，很多年輕人覺得：「哇！原來養魚也可以像在基地裡控制機器人一樣酷！」於是他們開始願意回到家鄉，成為新一代的「科技漁夫」。</p>
+                       <h3>機器人水土不服？阿公的科技大挑戰</h3>
+                       <p>有了這麼聰明的機器人幫手，為什麼我們去漁塭時，還是很少看到這些高科技機器呢？原來，要把實驗室裡的精密電腦搬到大自然裡，會遇到兩個超級大麻煩：</p>
+                       <ol>
+                           <li>機器人怕水又怕鹽： 魚塭的環境對電子機器來說簡直是地獄！那裡有超<strong>大太陽</strong>、鹹鹹的<strong>海風</strong>、還有<strong>充滿腐蝕性的水</strong>。很多<strong>昂貴的感測器放進水裡沒幾個月</strong>，就會<strong>生鏽壞掉</strong>，甚至上面<strong>長滿了「藤壺」和青苔</strong>。一直修理和換新機器的錢，對漁夫來說實在太貴了。</li>
+                           <li>阿公不相信機器人： 臺灣有很多養魚的阿公阿嬤已經 60 幾歲了，他們可能連智慧型手機都不太會用，<strong>看到這些複雜的英文介面和按鈕，心裡非常害怕</strong>。而且，他們覺得自己「養魚養了四十年」，鼻子和眼睛比常常當機的電腦可靠多了！「萬一電腦當機，忘記開水車，我的魚死光了誰要賠？」這是許多老漁民不敢用機器的最大原因。</li>
+                       </ol>
+                       <p>科技雖然很神奇，但如果機器不夠堅固，或是太難操作，漁夫阿伯們還是不敢放心使用。要怎麼發明出「不怕水、不怕鹽，而且跟電視遙控器一樣簡單」的機器人保母？這就是未來小科學家們（也許就是你！）要挑戰的超級任務囉！</p>`
+            }
+        };
+
+        const TRANSITION_MS = 400;
+
+        // 淡出指定區塊，動畫結束後才真正從版面移除
+        function hideSection(el) {
+            el.classList.add('is-hidden');
+            setTimeout(() => { el.style.display = 'none'; }, TRANSITION_MS);
+        }
+
+        // 將指定區塊以淡入動畫顯示出來
+        function showSection(el, displayValue) {
+            el.style.display = displayValue;
+            el.classList.add('is-hidden');
+            void el.offsetWidth; // 強制重排，確保動畫會被觸發
+            requestAnimationFrame(() => {
+                el.classList.remove('is-hidden');
+            });
+        }
+
+        // 文章段落隨著捲動緩緩淡入，閱讀起來更有層次
+        function initScrollReveal() {
+            const items = document.querySelectorAll('#article-body > *');
+            if (!('IntersectionObserver' in window)) {
+                items.forEach(el => el.classList.add('reveal-visible'));
+                return;
+            }
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('reveal-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+            items.forEach(el => observer.observe(el));
+        }
+
+        function showContent(id, fromPopState) {
+            const home = document.getElementById('home-section');
+            const interactive = document.getElementById('interactive-section');
+            const content = document.getElementById('content-section');
+            document.body.classList.add('article-mode');
+            currentArticleId = id;
+
+            // 淡出首頁與互動圖片區塊
+            hideSection(home);
+            hideSection(interactive);
+
+            // 更新文章內容與左上角分類標籤
+            document.getElementById('article-category').innerText = articles[id].category;
+            document.getElementById('article-title').innerText = articles[id].title;
+            document.getElementById('article-body').innerHTML = articles[id].body;
+            enhanceArticle(id);
+
+            // 等待淡出動畫結束後，再淡入顯示文章區塊
+            setTimeout(() => {
+                showSection(content, 'block');
+                window.scrollTo(0, 0);
+                initScrollReveal();
+            }, TRANSITION_MS);
+
+            // 更新網址，讓返回鍵與分享連結都能正常運作
+            if (!fromPopState) {
+                history.pushState({ articleId: id }, '', '#article-' + id);
+            }
+        }
+
+        function goBack(fromPopState) {
+            const home = document.getElementById('home-section');
+            const interactive = document.getElementById('interactive-section');
+            const content = document.getElementById('content-section');
+            setActiveTopic(null);
+            document.body.classList.remove('article-mode');
+            currentArticleId = null;
+
+            // 淡出文章區塊
+            hideSection(content);
+
+            // 等待淡出動畫結束後，再淡入顯示首頁與互動圖片區塊
+            setTimeout(() => {
+                showSection(home, 'flex');
+                showSection(interactive, 'flex');
+                interactive.scrollIntoView({ behavior: 'smooth' });
+            }, TRANSITION_MS);
+
+            if (!fromPopState) {
+                history.pushState({ articleId: null }, '', window.location.pathname);
+            }
+        }
+
+        // 不經過轉場動畫，直接跳到指定文章（用於分享連結開啟時）
+        function jumpToArticleInstant(id) {
+            document.body.classList.add('article-mode');
+            currentArticleId = id;
+            document.getElementById('home-section').style.display = 'none';
+            document.getElementById('interactive-section').style.display = 'none';
+
+            document.getElementById('article-category').innerText = articles[id].category;
+            document.getElementById('article-title').innerText = articles[id].title;
+            document.getElementById('article-body').innerHTML = articles[id].body;
+            enhanceArticle(id);
+
+            const content = document.getElementById('content-section');
+            content.style.display = 'block';
+            content.classList.remove('is-hidden');
+            window.scrollTo(0, 0);
+            initScrollReveal();
+        }
+
+        // 支援瀏覽器返回／前進鍵
+        window.addEventListener('popstate', (event) => {
+            if (event.state && event.state.articleId) {
+                showContent(event.state.articleId, true);
+            } else {
+                goBack(true);
+            }
+        });
+
+        // 若使用者是透過分享連結（網址帶有 #article-N）直接進入，直接顯示該篇文章
+        (function initFromHash() {
+            const match = window.location.hash.match(/^#article-(\d+)$/);
+            if (match && articles[match[1]]) {
+                const id = Number(match[1]);
+                history.replaceState({ articleId: id }, '', '#article-' + id);
+                jumpToArticleInstant(id);
+            } else {
+                history.replaceState({ articleId: null }, '', window.location.pathname);
+            }
+        })();
+
+
+        /* ===== 魚塭 AI 小助手：真正 AI API 連線版 =====
+           將 FISHPOND_AI_ENDPOINT 填入自己的 Vercel API 中繼網址。
+           注意：不要把 Gemini / OpenAI API Key 直接放在 HTML 裡。 */
+        const FISHPOND_AI_ENDPOINT = '';
+
+        // 已移除原本的本機預設回答資料。
+        // 目前魚塭 AI 小助手只會呼叫 FISHPOND_AI_ENDPOINT 指定的後端 API。
+
+        function toggleFishAssistant(forceOpen) {
+            const widget = document.getElementById('fish-ai-widget');
+            const toggle = document.getElementById('fish-ai-toggle');
+            const input = document.getElementById('fish-ai-input');
+            if (!widget || !toggle) return;
+            const open = typeof forceOpen === 'boolean' ? forceOpen : !widget.classList.contains('is-open');
+            widget.classList.toggle('is-open', open);
+            toggle.setAttribute('aria-expanded', String(open));
+            if (open) {
+                initFishAssistantGreeting();
+                setTimeout(() => input && input.focus(), 120);
+            }
+        }
+
+        function addFishMessage(role, text) {
+            const messages = document.getElementById('fish-ai-messages');
+            if (!messages) return;
+            const bubble = document.createElement('div');
+            bubble.className = 'fish-ai-message ' + role;
+            bubble.textContent = text;
+            messages.appendChild(bubble);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function initFishAssistantGreeting() {
+            const messages = document.getElementById('fish-ai-messages');
+            if (!messages || messages.dataset.started === 'true') return;
+            messages.dataset.started = 'true';
+            addFishMessage('bot', '嗨，我是魚塭 AI 小助手。\n我會依照這個網頁的文章內容回答你，也可以幫你整理重點或出題。');
+        }
+
+        function getCurrentTopicName() {
+            if (!currentArticleId || !articles[currentArticleId]) return '目前還在探索頁';
+            return articles[currentArticleId].title;
+        }
+
+        function buildCurrentArticleText() {
+            if (!currentArticleId || !articles[currentArticleId]) return '';
+            const tmp = document.createElement('div');
+            tmp.innerHTML = articles[currentArticleId].body;
+            return tmp.textContent.replace(/\s+/g, ' ').trim();
+        }
+
+        async function getFishAssistantReply(question) {
+            const q = (question || '').trim();
+            if (!q) return '請先輸入你的問題。';
+
+            if (!FISHPOND_AI_ENDPOINT) {
+                return 'AI 小助手尚未連接到後端 API。請先把 Vercel 產生的 /api/fish-ai 網址填到 FISHPOND_AI_ENDPOINT。';
+            }
+
+            try {
+                const res = await fetch(FISHPOND_AI_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        question: q,
+                        currentArticleId,
+                        currentTitle: getCurrentTopicName(),
+                        currentArticleText: buildCurrentArticleText()
+                    })
+                });
+
+                if (!res.ok) throw new Error('AI endpoint error');
+
+                const data = await res.json();
+                return data.answer || data.reply || 'AI 小助手沒有回傳答案，請再問一次。';
+            } catch (error) {
+                return 'AI 小助手目前連不上後端，請確認 Vercel 部署完成、GEMINI_API_KEY 已設定，且 FISHPOND_AI_ENDPOINT 網址正確。';
+            }
+        }
+
+        async function submitFishQuestion(question) {
+            const input = document.getElementById('fish-ai-input');
+            const q = (question || (input ? input.value : '') || '').trim();
+            if (!q) return;
+            if (input) input.value = '';
+            initFishAssistantGreeting();
+            addFishMessage('user', q);
+            addFishMessage('bot', '思考中……');
+            const messages = document.getElementById('fish-ai-messages');
+            const thinking = messages ? messages.lastElementChild : null;
+            const answer = await getFishAssistantReply(q);
+            if (thinking) thinking.textContent = answer;
+            if (messages) messages.scrollTop = messages.scrollHeight;
+        }
+
+        (function initFishAssistantUI() {
+            const form = document.getElementById('fish-ai-form');
+            if (form) {
+                form.addEventListener('submit', (event) => {
+                    event.preventDefault();
+                    submitFishQuestion();
+                });
+            }
+            document.querySelectorAll('.fish-ai-chip').forEach((chip) => {
+                chip.addEventListener('click', () => {
+                    toggleFishAssistant(true);
+                    submitFishQuestion(chip.dataset.question || chip.textContent);
+                });
+            });
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') toggleFishAssistant(false);
+            });
+        })();
+
+
+
+        initTitleReveal();
+        updateReadingProgress();
+        window.addEventListener('scroll', updateReadingProgress, { passive: true });
+        window.addEventListener('resize', updateReadingProgress);
+
+        // 互動照片滾動進入畫面時，緩緩從低彩度轉為原始色彩
+        (function initPhotoReveal() {
+            const imageContainer = document.querySelector('.image-container');
+            if (!imageContainer) return;
+            if (!('IntersectionObserver' in window)) {
+                imageContainer.classList.add('is-revealed');
+                return;
+            }
+            const photoObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        imageContainer.classList.add('is-revealed');
+                        photoObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.3 });
+            photoObserver.observe(imageContainer);
+        })();
+    </script>
+</body>
+</html>
