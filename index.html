@@ -949,13 +949,50 @@
             margin: 0.4rem 1.6rem 1.05rem 0;
         }
         .article-media.media-video {
-            width: min(46%, 390px);
+            float: none !important;
+            clear: both !important;
+            width: min(100%, 760px) !important;
+            margin: 2rem auto !important;
+            position: relative;
+            z-index: 10;
         }
         .article-media.media-wide {
             float: none;
             clear: both;
             width: min(100%, 760px);
             margin: 2rem auto;
+        }
+
+        /* ===== 個別圖片位置微調：避免圖片壓到標題 ===== */
+        .article-media.media-nudge-up {
+            margin-top: -1.05rem;
+            margin-bottom: 1.65rem;
+        }
+        .article-media.media-left.media-nudge-up {
+            margin-top: -1.05rem;
+            margin-bottom: 1.65rem;
+        }
+        .article-media.media-nudge-down {
+            margin-top: 1.35rem;
+            margin-bottom: 1.7rem;
+        }
+        .article-media.media-left.media-nudge-down {
+            margin-top: 1.35rem;
+            margin-bottom: 1.7rem;
+        }
+        .article-media.media-photo-large {
+            float: none !important;
+            clear: both !important;
+            width: min(100%, 760px) !important;
+            margin: 2rem auto 2.25rem !important;
+        }
+        .article-media.media-photo-large img {
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            object-position: center;
+        }
+        .article-media.media-safe-gap {
+            margin-bottom: 2.25rem;
         }
         .article-media img,
         .article-media video {
@@ -964,6 +1001,18 @@
             height: auto;
             background: #111;
             object-fit: cover;
+        }
+        .article-media.media-video video {
+            display: block;
+            width: 100%;
+            height: auto;
+            pointer-events: auto !important;
+            position: relative;
+            z-index: 20;
+            background: #111;
+        }
+        .article-media.media-video * {
+            pointer-events: auto !important;
         }
         .article-media img {
             filter: grayscale(8%) contrast(1.03) brightness(0.98);
@@ -1002,7 +1051,7 @@
                 float: none;
                 clear: both;
                 width: 100%;
-                margin: 1.35rem 0 1.65rem;
+                margin: 1.35rem 0 1.65rem !important;
                 border-radius: 16px;
             }
         }
@@ -1410,11 +1459,11 @@
                 title: "魚塭底下的神祕黑泥：是毒藥還是黃金？",
                 body: `<p>你有沒有經過魚塭時，聞過一股像「臭雞蛋」的刺鼻味道？或是看過池水變得像綠豆湯一樣，整片都綠油油的？其實這都是漁塭裡面的「隱形怪獸」搞得鬼。</p>
                        <h3>魚池裡的「隱形怪獸」是怎麼來的？</h3>
-                       <p>為了解決大家愛吃海鮮的需求，現在的養殖場常常是「小小的池子，住著滿滿的魚蝦」。你可以想像一下，如果有一百個小朋友被擠在一間小教室裡，每天在裡面吃飯、上廁所，卻從不打掃，會發生什麼事？</p>
-                       <figure class="article-media media-right">
+                       <figure class="article-media media-right media-nudge-up media-safe-gap" style="margin-top: 10px;">
                            <img src="assets/media/bottom-mud.png" alt="魚塭底泥與泥濘水面" loading="lazy" decoding="async">
                            <figcaption>魚塭底部累積的黑泥，對應飼料、排泄物與有機物沉積後造成的水質壓力。</figcaption>
                        </figure>
+                       <p>為了解決大家愛吃海鮮的需求，現在的養殖場常常是「小小的池子，住著滿滿的魚蝦」。你可以想像一下，如果有一百個小朋友被擠在一間小教室裡，每天在裡面吃飯、上廁所，卻從不打掃，會發生什麼事？</p>
                        <p>沒錯，會變得又髒又臭。那漁塭也是一樣的概念。<strong>魚蝦吃不完的飼料、便便，還有不小心死掉的小水生動物</strong>，假如沒有清理掉的話，最後都會慢慢<strong>沉到池子最底下</strong>，<strong>變成</strong>一層又厚又臭的<strong>「底泥」</strong>。</p>
                        <p>當這些<strong>底泥</strong>在水底悶著、<strong>沒有氧氣</strong>的時候，<strong>細菌就會跑來分解它們，並且偷偷釋放出有毒的化學氣體</strong>（例如：氨氮、硫化氫）。這就是臭味的來源，也是讓水變髒、讓魚蝦生病的「隱形怪獸」！</p>
                        <h3>把怪獸變成「綠金」的神奇魔法</h3>
@@ -1443,7 +1492,7 @@
                 title: "魚池裡的動物大亂鬥：該讓魚蝦交朋友，還是當獨行俠？",
                 body: `<p>想像一下你的班級，如果全班每一個人都只會畫畫，沒有人會算數學、沒有人會跑步，也沒有人會打掃，這個班級能順利運作嗎？</p>
                        <p>大自然的池塘也是一樣的！在<strong>很久以前，臺灣的魚塭</strong>裡非常熱鬧，<strong>住著各式各樣的魚、蝦子、螺類，還有綠綠的藻類</strong>，大家像一個大家庭一樣生活在一起。但在這幾十年來，魚池裡卻悄悄發生了巨大的變化。</p>
-                       <figure class="article-media media-left">
+                       <figure class="article-media media-wide media-photo-large">
                            <img src="assets/media/historical-fishpond.jpg" alt="日治時期魚塭老照片" loading="lazy" decoding="async">
                            <figcaption>早期魚塭留下的影像，放在「過去的魚塭生態」段落，讓時間感自然接上文章。</figcaption>
                        </figure>
@@ -1454,15 +1503,15 @@
                        <h3>大自然的神奇團隊：生物多樣性的魔法</h3>
                        <p>為了解決這個危機，科學家和年輕的漁夫們提出了一個新點子：我們把魚蝦的朋友們找回來吧！ 這在科學上叫做<strong>恢復「生物多樣性</strong>」。</p>
                        <p>其實，大自然本身就是一個超級完美的團隊。如果在<strong>池子裡放進不同種類的生物</strong>，牠們就會<strong>發揮各自的超能力</strong>：</p>
+                       <figure class="article-media media-right media-nudge-up media-safe-gap">
+                           <img src="assets/media/polyculture-clam-harvest.jpg" alt="混養魚塭中捕撈蛤蜊" loading="lazy" decoding="async">
+                           <figcaption>混養魚塭裡，文蛤等生物能扮演濾水與資源利用的角色。</figcaption>
+                       </figure>
                        <ul>
                            <li>除「藻」機： 吃藻類的<strong>魚</strong>可以幫忙<strong>吃掉過多的藻類</strong>，不讓水變混濁。</li>
                            <li>濾水器： 躲在泥土裡的<strong>文蛤和牡蠣</strong>，會<strong>把水裡的碎屑吸進去吃掉</strong>，讓水變得更乾淨。</li>
                        </ul>
                        <p>當大家分工合作，池水就會自動保持乾淨，漁夫再也不需要倒進可怕的化學藥劑了！這種健康環境養出來的魚，肉質反而更好吃。</p>
-                       <figure class="article-media media-right">
-                           <img src="assets/media/polyculture-clam-harvest.jpg" alt="混養魚塭中捕撈蛤蜊" loading="lazy" decoding="async">
-                           <figcaption>混養魚塭裡，文蛤等生物能扮演濾水與資源利用的角色。</figcaption>
-                       </figure>
                        <p>在臺南的七股，還有漁夫阿伯特別在冬天把水抽淺，故意留下一些小魚，請來過冬的「黑面琵鷺」飽餐一頓。這種愛護鳥類又保護環境的魚蝦，會獲得政府頒發的「環保標章」，在市場上可以賣到更好的價錢呢！</p>
                        <h3>大自然的貪吃鬼與漁夫的眼淚</h3>
                        <p>哇！讓不同的動物住在一起，聽起來像童話故事一樣美好。但為什麼還是有很多傳統的漁夫阿伯，拼了命也要反對呢？</p>
@@ -1481,7 +1530,7 @@
                        <p>在臺灣，養魚一直是一個「靠天吃飯」的辛苦工作。現在全球氣候變遷，天氣就像發脾氣的怪獸一樣，常常出現極端的可怕變化，這讓魚池裡的魚蝦們面臨了巨大的生存危機！</p>
                        <h3>魚池裡的「冰風暴」與「大水災」</h3>
                        <p>在 2016 年的冬天，臺灣發生了一場超可怕的「霸王級寒流」。當時南部的<strong>氣溫突然掉到只剩個位數</strong>，那些原本<strong>習慣溫暖天氣的虱目魚和石斑魚</strong>，就像沒穿外套一樣，在冰冷的水裡<strong>被活活凍死</strong>，水面上浮滿了魚的屍體，讓漁夫阿伯們看了好心痛。</p>
-                       <figure class="article-media media-right media-video">
+                       <figure class="article-media media-wide media-video">
                            <video controls playsinline preload="metadata">
                                 <source src="assets/media/cold-wave-fish-death.mp4" type="video/mp4">
                                 你的瀏覽器不支援影片播放。
@@ -1494,13 +1543,13 @@
                        <ul>
                            <li>魔法一：蓋一條「深水禦寒毯」原本的魚池大約只有一個大人那麼深（1.5 公尺）。<strong>科學家建議把池子挖到兩倍深</strong>（3公尺）！因為<strong>越深的水，溫度的變化就越慢</strong>。當寒流來的時候，深層的水溫就像一條厚厚的保暖毯，可以保護魚蝦不被凍傷；大雨來的時候，也比較不會滿出來。</li>
                            <li>魔法二：打造超強的「室內水城堡」更厲害的方法，是直接<strong>幫魚池蓋一個有屋頂的溫室</strong>，甚至是完全封閉的室內工廠！裡面不但能擋風遮雨，還有冷暖氣可以控制水溫。住在城堡裡的魚，一年四季都能平平安安地長大，就算外面刮大風下大雨也不怕。</li>
-                       <figure class="article-media media-left">
-                           <img src="assets/media/greenhouse-fishpond.jpg" alt="有遮棚的溫室魚塭" loading="lazy" decoding="async">
-                           <figcaption>溫室魚塭像替魚蝦加上一層防護罩，能呼應文章中的「室內水城堡」。</figcaption>
-                       </figure>
                        </ul>
                        <h3>蓋城堡太貴了！漁夫阿伯的艱難選擇</h3>
                        <p>哇！有了「水城堡」，魚蝦就安全了，為什麼大家不趕快蓋呢？</p>
+                       <figure class="article-media media-left media-nudge-down media-safe-gap">
+                           <img src="assets/media/greenhouse-fishpond.jpg" alt="有遮棚的溫室魚塭" loading="lazy" decoding="async">
+                           <figcaption>溫室魚塭像替魚蝦加上一層防護罩，能呼應文章中的「室內水城堡」。</figcaption>
+                       </figure>
                        <p>因為，在現實世界裡，蓋城堡的代價實在太驚人了！首先，<strong>要蓋一間防颱風的溫室，需要花費好幾百萬甚至上千萬元</strong>，這些錢都可以去買一台汽車了，甚至可以直接買一輛保時捷。而且，室內城堡需要 24 小時開著機器來抽水和吹暖氣，每個月的電費會讓人嚇到下巴掉下來。</p>
                        <p>很多傳統的漁夫阿伯精打細算後，搖搖頭說：「超級寒流或大颱風，可能好幾年才來一次。如果我現在去銀行借一大筆錢蓋溫室，我可能連飯都吃不飽了。」</p>
                        <p>對他們來說，與其花大錢蓋城堡，不如維持現在的樣子。如果真的不幸遇到天災，至少還可以向政府申請「天然災害補助」，拿一點救命錢來彌補損失。</p>
@@ -1553,8 +1602,11 @@
                 body: `<p>如果讓你選一份未來的工作：一個是坐在有冷氣的辦公室裡，週休二日，每個月有固定的薪水；另一個是每天要在烈日下曬太陽、在寒流來時吹冷風，身上總是沾著魚腥味，而且只要颱風一來，賺的錢可能瞬間泡湯。你會選哪一個？</p>
                        <p>相信大部分的人都會選擇去城市裡吹冷氣吧！這就是臺灣漁村現在面臨的最大危機。</p>
                        <p>幾十年來，漁村裡的年輕人長大後，紛紛跑到大城市去上班。現在留在魚塭旁邊辛苦養魚的，幾乎都是滿頭白髮、平均年齡超過 60 歲的阿公阿嬤，有些甚至已經 80 歲了還在苦撐。當這些「白髮超級英雄」慢慢變老、體力衰退，再也搬不動沉重的飼料時，誰來接班養魚給我們吃呢？</p>
-                       <figure class="article-media media-left media-video">
-                           <video src="assets/media/aging-fishing-village.mp4" controls preload="metadata" playsinline></video>
+                       <figure class="article-media media-wide media-video">
+                           <video controls playsinline preload="metadata">
+                                <source src="assets/media/aging-fishing-village.mp4" type="video/mp4">
+                                你的瀏覽器不支援影片播放。
+                            </video>
                            <figcaption>漁村高齡化的新聞片段，放在「白髮超級英雄」段落旁，讓社會問題更有畫面。</figcaption>
                        </figure>
                        <h3>危機變成轉機？打造「超級大魚廠」</h3>
@@ -1574,23 +1626,23 @@
                 title: "魚塭頭頂上的「發電大傘」：一邊種電一邊養魚，真的可行嗎？",
                 body: `<p>為了保護地球、減少空氣污染，大家都在努力使用不會製造黑煙的「綠色能源」，比如太陽能。但是，臺灣的土地這麼小、人這麼多，哪來那麼大的空地可以放太陽能板呢？</p>
                        <p>這時候，有人把腦筋動到了<strong>南部廣大的魚塭</strong>上：「魚池那裡<strong>太陽超大</strong>，如果我們在<strong>魚池上面蓋太陽能板</strong>，不就可以『<strong>一邊發電、一邊養魚</strong>』了嗎？」這個聽起來一舉兩得的好點子，叫做「<strong>漁電共生</strong>」。</p>
-                       <figure class="article-media media-right">
+                       <p>為了保護魚兒，政府還特別規定：太陽能板不能把魚池全部蓋住，必須留下一大半的空間讓陽光照進來，而且養出來的魚不能變少太多，否則就不准賣電！</p>
+                       <figure class="article-media media-wide ">
                            <img src="assets/media/solar-revenue.jpeg" alt="水面上的太陽能板支架" loading="lazy" decoding="async">
                            <figcaption>魚塭上方架設太陽能板，對應「一邊發電、一邊養魚」的基本概念。</figcaption>
                        </figure>
-                       <p>為了保護魚兒，政府還特別規定：太陽能板不能把魚池全部蓋住，必須留下一大半的空間讓陽光照進來，而且養出來的魚不能變少太多，否則就不准賣電！</p>
                        <h3>太陽能板變成魚兒的「超級保護傘」</h3>
                        <p>對很多地主和支持這個計畫的人來說，這簡直是天上掉下來的禮物！</p>
                        <ul>
                            <li>超級防護罩： 夏天太陽太毒辣，水溫太高會把魚熱死；冬天寒流來，魚又會凍傷。水面上的太陽能板就像一把大傘，夏天幫魚兒<strong>遮陽</strong>，冬天幫忙<strong>擋住</strong>冰冷的<strong>狂風</strong>。</li>
                            <li>安定的零用錢： 養魚常常要看天氣，有時候遇到天災，魚死光了就沒錢賺。現在只要讓發電公司在魚池上蓋<strong>太陽能板</strong>，魚塭的主人每年都能<strong>拿到一筆很穩定的「租金」</strong>，還可以拿這筆錢來把破舊的魚池翻新，升級成更厲害的養殖場。</li>
                        </ul>
-                       <figure class="article-media media-left">
+                       <h3>太陽能大傘下的「陰影」</h3>
+                       <p>哇！一邊賺電費、一邊養魚，這麼完美的點子，為什麼會在漁村裡引起超級大吵架，甚至讓環保團體抗議呢？原來，當大家發現「發電比養魚更好賺」的時候，事情就變調了：</p>
+                       <figure class="article-media media-left media-nudge-down media-safe-gap">
                            <img src="assets/media/qigu-solar-fishery.jpg" alt="臺南七股大面積漁電共生場域空拍" loading="lazy" decoding="async">
                            <figcaption>大面積漁電共生空拍圖，放在利益與爭議交界處，讓規模感更清楚。</figcaption>
                        </figure>
-                       <h3>太陽能大傘下的「陰影」</h3>
-                       <p>哇！一邊賺電費、一邊養魚，這麼完美的點子，為什麼會在漁村裡引起超級大吵架，甚至讓環保團體抗議呢？原來，當大家發現「發電比養魚更好賺」的時候，事情就變調了：</p>
                        <ul>
                            <li>漁夫被迫搬家： 發電公司太有錢了，他們願意付給地主的租金，比原本租給漁夫養魚的錢多出好幾倍！很多地主看了很心動，就<strong>把土地租給發電公司，不租給真正會養魚的漁夫</strong>了。這害得許多認真養魚的阿伯和年輕人突然失業，沒有地方可以工作。</li>
                            <li>水裡的綠藻餓肚子： 太陽能板雖然只遮住了一部分天空，但對池子裡的生態還是有很大的影響。水裡微小的「綠藻」需要曬太陽才能長大，<strong>陽光變少了</strong>，綠藻長不出來，那些靠吃綠藻長大的<strong>文蛤和魚蝦就會餓肚子，甚至生病死掉</strong>。</li>
@@ -1663,6 +1715,41 @@
             items.forEach(el => observer.observe(el));
         }
 
+        // 修正文章用 innerHTML 動態插入後，影片控制列出現但無法播放的問題
+        function refreshArticleVideos() {
+            const videos = document.querySelectorAll('#article-body video');
+
+            videos.forEach((oldVideo) => {
+                const oldSource = oldVideo.querySelector('source');
+                const src = oldSource ? oldSource.getAttribute('src') : oldVideo.getAttribute('src');
+                if (!src) return;
+
+                // 重新建立 video 元素，讓瀏覽器確實重新掛載影片播放器
+                const video = document.createElement('video');
+                video.controls = true;
+                video.playsInline = true;
+                video.preload = 'metadata';
+                video.setAttribute('controls', '');
+                video.setAttribute('playsinline', '');
+                video.setAttribute('preload', 'metadata');
+                video.style.pointerEvents = 'auto';
+                video.style.position = 'relative';
+                video.style.zIndex = '20';
+
+                const source = document.createElement('source');
+                source.src = src;
+                source.type = 'video/mp4';
+                video.appendChild(source);
+                video.appendChild(document.createTextNode('你的瀏覽器不支援影片播放。'));
+
+                oldVideo.replaceWith(video);
+
+                requestAnimationFrame(() => {
+                    video.load();
+                });
+            });
+        }
+
         function showContent(id, fromPopState) {
             const home = document.getElementById('home-section');
             const interactive = document.getElementById('interactive-section');
@@ -1685,6 +1772,7 @@
                 showSection(content, 'block');
                 window.scrollTo(0, 0);
                 initScrollReveal();
+                refreshArticleVideos();
             }, TRANSITION_MS);
 
             // 更新網址，讓返回鍵與分享連結都能正常運作
@@ -1733,6 +1821,7 @@
             content.classList.remove('is-hidden');
             window.scrollTo(0, 0);
             initScrollReveal();
+            refreshArticleVideos();
         }
 
         // 支援瀏覽器返回／前進鍵
